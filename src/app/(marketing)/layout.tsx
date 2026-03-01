@@ -30,6 +30,7 @@ export default function MarketingLayout({
     { label: "Tech Stack", href: "#stack" },
     { label: "Projetos", href: "#projetos" },
     { label: "Contato", href: "#contato" },
+    { label: "Orçamento", href: "/orcamento", isRoute: true },
   ];
 
   return (
@@ -55,14 +56,25 @@ export default function MarketingLayout({
           {/* Links Desktop */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-sm text-[#6b6b80] hover:text-[#00f0ff] transition-colors relative group font-medium"
-              >
-                {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#00f0ff] group-hover:w-full transition-all duration-300 shadow-[0_0_8px_rgba(0,240,255,0.5)]" />
-              </a>
+              link.isRoute ? (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-[#00ff41] hover:text-[#00ff41] transition-colors relative group font-bold"
+                >
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-[#00ff41] shadow-[0_0_8px_rgba(0,255,65,0.5)]" />
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-[#6b6b80] hover:text-[#00f0ff] transition-colors relative group font-medium"
+                >
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#00f0ff] group-hover:w-full transition-all duration-300 shadow-[0_0_8px_rgba(0,240,255,0.5)]" />
+                </a>
+              )
             ))}
           </div>
 

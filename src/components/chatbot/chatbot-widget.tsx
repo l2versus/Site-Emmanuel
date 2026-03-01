@@ -113,7 +113,7 @@ export function ChatbotWidget() {
 
   return (
     <>
-      {/* ─── Botão Flutuante Cyberpunk ───────────────────────────────── */}
+      {/* ─── Botão Flutuante Cyberpunk Premium ───────────────────────── */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -122,26 +122,54 @@ export function ChatbotWidget() {
             exit={{ scale: 0, opacity: 0 }}
             className="fixed bottom-6 right-6 z-50"
           >
-            {/* Notification badge */}
+            {/* Notification badge com animação melhorada */}
             {hasNewMessage && (
               <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="absolute -top-2 -left-2 flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#00f0ff] text-[10px] font-bold text-black whitespace-nowrap shadow-[0_0_15px_rgba(0,240,255,0.4)]"
+                initial={{ scale: 0, opacity: 0, x: 10 }}
+                animate={{ scale: 1, opacity: 1, x: 0 }}
+                exit={{ scale: 0, opacity: 0, x: 10 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="absolute -top-3 -left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#00f0ff] to-[#00d4e6] text-[11px] font-bold text-black whitespace-nowrap shadow-[0_0_20px_rgba(0,240,255,0.5),0_4px_12px_rgba(0,0,0,0.3)]"
               >
-                <Sparkles className="h-3 w-3" />
+                <motion.div
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                </motion.div>
                 Posso te ajudar!
+                {/* Seta apontando para o botão */}
+                <div className="absolute -bottom-1.5 right-3 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#00d4e6]" />
               </motion.div>
             )}
 
+            {/* Pulse ring animado */}
+            <motion.div
+              animate={{ scale: [1, 1.4, 1.4], opacity: [0.4, 0, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
+              className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/40"
+            />
+            <motion.div
+              animate={{ scale: [1, 1.6, 1.6], opacity: [0.3, 0, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeOut", delay: 0.4 }}
+              className="absolute inset-0 rounded-full border-2 border-[#00f0ff]/30"
+            />
+
             <motion.button
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsOpen(true)}
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0a0a0f] border-2 border-[#00f0ff]/50 text-[#00f0ff] shadow-[0_0_25px_rgba(0,240,255,0.3)] hover:shadow-[0_0_40px_rgba(0,240,255,0.5)] transition-all duration-300"
+              className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#0a0a0f] to-[#14141f] border-2 border-[#00f0ff]/60 text-[#00f0ff] shadow-[0_0_30px_rgba(0,240,255,0.4),inset_0_0_20px_rgba(0,240,255,0.1)] hover:shadow-[0_0_50px_rgba(0,240,255,0.6),inset_0_0_30px_rgba(0,240,255,0.2)] transition-all duration-300"
               aria-label="Abrir chat"
             >
-              <MessageCircle className="h-6 w-6" />
+              {/* Glow interno */}
+              <div className="absolute inset-1 rounded-full bg-gradient-to-br from-[#00f0ff]/10 to-transparent" />
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+                className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(0,240,255,0.15),transparent,transparent)] opacity-50"
+              />
+              <MessageCircle className="h-7 w-7 relative z-10" />
             </motion.button>
           </motion.div>
         )}

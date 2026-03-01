@@ -15,6 +15,7 @@ import {
 } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Github,
   Instagram,
@@ -35,6 +36,8 @@ import {
   Database,
   Globe,
   Cpu,
+  X,
+  FileText,
 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -79,6 +82,274 @@ function Reveal({
     >
       {children}
     </motion.div>
+  );
+}
+
+// ─── Staggered Reveal (para listas) ───────────────────────────────────────────
+function StaggerReveal({
+  children,
+  staggerDelay = 0.1,
+  className = "",
+}: {
+  children: React.ReactNode[];
+  staggerDelay?: number;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      className={className}
+    >
+      {children.map((child, i) => (
+        <motion.div
+          key={i}
+          variants={{
+            hidden: { opacity: 0, y: 40, scale: 0.95 },
+            visible: {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: {
+                delay: i * staggerDelay,
+                duration: 0.6,
+                ease: [0.16, 1, 0.3, 1],
+              },
+            },
+          }}
+        >
+          {child}
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}
+
+// ─── Parallax Section Divider ─────────────────────────────────────────────────
+function ParallaxDivider({ color = "#00f0ff" }: { color?: string }) {
+  return (
+    <div className="relative h-32 overflow-hidden">
+      <motion.div
+        initial={{ x: "-100%" }}
+        whileInView={{ x: "0%" }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        className="absolute top-1/2 left-0 right-0 h-px"
+        style={{ background: `linear-gradient(to right, transparent, ${color}, transparent)` }}
+      />
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
+        style={{ background: color, boxShadow: `0 0 20px ${color}60` }}
+      />
+    </div>
+  );
+}
+
+// ─── Image Reveal Animation ───────────────────────────────────────────────────
+function ImageReveal({
+  children,
+  direction = "left",
+  className = "",
+}: {
+  children: React.ReactNode;
+  direction?: "left" | "right" | "up" | "down";
+  className?: string;
+}) {
+  const clipPaths = {
+    left: ["inset(0 100% 0 0)", "inset(0 0% 0 0)"],
+    right: ["inset(0 0 0 100%)", "inset(0 0 0 0%)"],
+    up: ["inset(100% 0 0 0)", "inset(0% 0 0 0)"],
+    down: ["inset(0 0 100% 0)", "inset(0 0 0% 0)"],
+  };
+
+  return (
+    <motion.div
+      initial={{ clipPath: clipPaths[direction][0], opacity: 0.5 }}
+      whileInView={{ clipPath: clipPaths[direction][1], opacity: 1 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Tech Modal ───────────────────────────────────────────────────────────────
+function TechModal({
+  tech,
+  onClose,
+}: {
+  tech: { name: string; icon: string; cat: string; level: number; desc: string } | null;
+  onClose: () => void;
+}) {
+  if (!tech) return null;
+
+  const catColors: Record<string, string> = {
+    Frontend: "#00f0ff",
+    Backend: "#ff00ff",
+    DevOps: "#00ff41",
+  };
+
+  const color = catColors[tech.cat] || "#00f0ff";
+
+  return (
+    <AnimatePresence>
+      {tech && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={onClose}
+        >
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-[#0a0a0f]/90 backdrop-blur-md"
+          />
+
+          {/* Modal */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-md rounded-2xl border overflow-hidden"
+            style={{
+              borderColor: `${color}30`,
+              background: "linear-gradient(145deg, #0f0f18 0%, #0a0a0f 100%)",
+              boxShadow: `0 0 60px ${color}15, 0 25px 50px rgba(0,0,0,0.5)`,
+            }}
+          >
+            {/* Glow effect */}
+            <div
+              className="absolute top-0 left-0 right-0 h-32 opacity-30"
+              style={{
+                background: `radial-gradient(ellipse at top, ${color}30 0%, transparent 70%)`,
+              }}
+            />
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 rounded-lg text-[#6b6b80] hover:text-white hover:bg-white/5 transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="relative p-8">
+              {/* Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: "spring" }}
+                className="flex h-20 w-20 items-center justify-center rounded-2xl text-4xl mb-6"
+                style={{
+                  background: `${color}15`,
+                  border: `1px solid ${color}30`,
+                  boxShadow: `0 0 30px ${color}20`,
+                }}
+              >
+                {tech.icon}
+              </motion.div>
+
+              {/* Category badge */}
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono mb-4"
+                style={{
+                  background: `${color}15`,
+                  color: color,
+                  border: `1px solid ${color}25`,
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+                {tech.cat}
+              </motion.div>
+
+              {/* Title */}
+              <motion.h3
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-2xl font-bold text-white mb-4"
+              >
+                {tech.name}
+              </motion.h3>
+
+              {/* Description */}
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="text-[#9999ab] leading-relaxed mb-6"
+              >
+                {tech.desc}
+              </motion.p>
+
+              {/* Skill bar */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-[#6b6b80] font-mono">Proficiência</span>
+                  <span className="font-bold" style={{ color }}>{tech.level}%</span>
+                </div>
+                <div className="h-2 bg-[#1e1e2e] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${tech.level}%` }}
+                    transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+                    className="h-full rounded-full"
+                    style={{
+                      background: `linear-gradient(to right, ${color}, ${color}aa)`,
+                      boxShadow: `0 0 10px ${color}50`,
+                    }}
+                  />
+                </div>
+              </motion.div>
+
+              {/* CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 pt-6 border-t border-[#1e1e2e]"
+              >
+                <p className="text-sm text-[#6b6b80] text-center">
+                  Quer saber mais sobre como uso {tech.name} nos meus projetos?
+                </p>
+                <Link
+                  href="/orcamento"
+                  className="mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]"
+                  style={{
+                    background: `linear-gradient(135deg, ${color} 0%, ${color}cc 100%)`,
+                    color: "#0a0a0f",
+                    boxShadow: `0 0 30px ${color}30`,
+                  }}
+                >
+                  <FileText className="w-4 h-4" />
+                  Solicitar Orçamento
+                </Link>
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -313,12 +584,12 @@ const projects = [
     number: "01",
   },
   {
-    title: "Emmanuel Estética",
+    title: "Myka Procópio",
     subtitle: "SaaS Clínica",
     description:
       "Sistema completo para clínica de estética — agendamento online, pagamentos PIX via Mercado Pago, dashboard financeiro, chatbot IA, notificações WhatsApp e controle de evolução.",
     tags: ["Next.js", "Prisma", "Mercado Pago", "NextAuth", "Tailwind"],
-    link: "#",
+    link: "https://www.mykaprocopio.com.br",
     image: "/images/project-estetica.png",
     color: "#ff00ff",
     number: "02",
@@ -347,6 +618,9 @@ export default function HomePage() {
   });
   const photoY = useTransform(aboutProgress, [0, 1], [60, -60]);
   const photoRotate = useTransform(aboutProgress, [0, 1], [-3, 3]);
+
+  // Estado para o modal de tecnologias
+  const [selectedTech, setSelectedTech] = useState<typeof techStack[0] | null>(null);
 
   return (
     <>
@@ -444,6 +718,14 @@ export default function HomePage() {
                   Ver Projetos
                   <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </MagneticButton>
+
+                <Link
+                  href="/orcamento"
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.5)] transition-all duration-500"
+                >
+                  <FileText className="h-4 w-4" />
+                  Orçamento
+                </Link>
 
                 <MagneticButton
                   href="#contato"
@@ -813,39 +1095,76 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Tech grid with skill bars */}
+          {/* Tech grid with skill bars - CLICÁVEL */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {techStack.map((tech, i) => (
-              <Reveal key={tech.name} delay={i * 0.04}>
-                <motion.div
-                  whileHover={{ y: -6, scale: 1.03 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="glass-card rounded-xl p-4 cursor-default group"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{tech.icon}</span>
-                    <div>
-                      <div className="text-sm font-semibold text-white">
-                        {tech.name}
-                      </div>
-                      <div className="text-[10px] text-[#6b6b80] font-mono">
-                        {tech.cat}
+            {techStack.map((tech, i) => {
+              const catColors: Record<string, string> = {
+                Frontend: "#00f0ff",
+                Backend: "#ff00ff",
+                DevOps: "#00ff41",
+              };
+              const color = catColors[tech.cat] || "#00f0ff";
+              
+              return (
+                <Reveal key={tech.name} delay={i * 0.04}>
+                  <motion.div
+                    whileHover={{ y: -8, scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    onClick={() => setSelectedTech(tech)}
+                    className="glass-card rounded-xl p-4 cursor-pointer group relative overflow-hidden"
+                  >
+                    {/* Hover glow effect */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: `radial-gradient(circle at 50% 50%, ${color}15 0%, transparent 70%)`,
+                      }}
+                    />
+                    
+                    {/* Click indicator */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: color, boxShadow: `0 0 8px ${color}` }} />
+                    </motion.div>
+                    
+                    <div className="relative z-10 flex items-center gap-3 mb-3">
+                      <span className="text-2xl group-hover:scale-110 transition-transform">{tech.icon}</span>
+                      <div>
+                        <div className="text-sm font-semibold text-white group-hover:text-[#00f0ff] transition-colors">
+                          {tech.name}
+                        </div>
+                        <div className="text-[10px] text-[#6b6b80] font-mono">
+                          {tech.cat}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  {/* Skill bar */}
-                  <div className="h-1 bg-[#1e1e2e] rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${tech.level}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.2, delay: i * 0.05, ease: "easeOut" }}
-                      className="h-full rounded-full bg-gradient-to-r from-[#00f0ff] to-[#ff00ff]"
-                    />
-                  </div>
-                </motion.div>
-              </Reveal>
-            ))}
+                    
+                    {/* Skill bar */}
+                    <div className="relative z-10 h-1.5 bg-[#1e1e2e] rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${tech.level}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, delay: i * 0.05, ease: "easeOut" }}
+                        className="h-full rounded-full"
+                        style={{
+                          background: `linear-gradient(to right, ${color}, ${color}aa)`,
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Hint text */}
+                    <div className="relative z-10 mt-2 text-[9px] text-[#6b6b80] font-mono opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                      Clique para saber mais
+                    </div>
+                  </motion.div>
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -884,33 +1203,46 @@ export default function HomePage() {
                   <div
                     className={`lg:col-span-7 ${i % 2 === 1 ? "lg:order-2" : ""}`}
                   >
-                    <TiltCard>
-                      <div
-                        className="relative aspect-[16/10] rounded-2xl overflow-hidden border group cursor-pointer"
-                        style={{ borderColor: `${project.color}15` }}
-                      >
-                        {/* Screenshot do projeto */}
-                        <Image
-                          src={project.image}
-                          alt={project.title}
-                          fill
-                          className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                          sizes="(max-width: 768px) 100vw, 58vw"
-                        />
-
-                        {/* Overlay gradiente sutil */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/70 via-transparent to-[#0a0a0f]/20 pointer-events-none" />
-                        <div className="absolute inset-0 scanlines opacity-8 pointer-events-none" />
-
-                        {/* Large number overlay */}
-                        <div className="absolute top-4 left-5 z-10 pointer-events-none">
-                          <span
-                            className="text-7xl font-black opacity-[0.12] leading-none"
-                            style={{ color: project.color }}
+                    <ImageReveal direction={i % 2 === 0 ? "left" : "right"}>
+                      <TiltCard>
+                        <div
+                          className="relative aspect-[16/10] rounded-2xl overflow-hidden border group cursor-pointer"
+                          style={{ borderColor: `${project.color}15` }}
+                        >
+                          {/* Screenshot do projeto */}
+                          <motion.div
+                            className="relative w-full h-full"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ duration: 0.7 }}
                           >
-                            {project.number}
-                          </span>
-                        </div>
+                            <Image
+                              src={project.image}
+                              alt={project.title}
+                              fill
+                              className="object-cover object-top"
+                              sizes="(max-width: 768px) 100vw, 58vw"
+                            />
+                          </motion.div>
+
+                          {/* Overlay gradiente sutil */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/70 via-transparent to-[#0a0a0f]/20 pointer-events-none" />
+                          <div className="absolute inset-0 scanlines opacity-8 pointer-events-none" />
+
+                          {/* Large number overlay */}
+                          <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: 0.3 }}
+                            className="absolute top-4 left-5 z-10 pointer-events-none"
+                          >
+                            <span
+                              className="text-7xl font-black opacity-[0.12] leading-none"
+                              style={{ color: project.color }}
+                            >
+                              {project.number}
+                            </span>
+                          </motion.div>
 
                         {/* Neon border glow on hover */}
                         <div
@@ -940,7 +1272,7 @@ export default function HomePage() {
                             >
                               <ExternalLink className="h-6 w-6" style={{ color: project.color }} />
                             </motion.div>
-                            <span
+                          <span
                               className="text-sm font-mono font-bold tracking-wider uppercase"
                               style={{ color: project.color }}
                             >
@@ -950,6 +1282,7 @@ export default function HomePage() {
                         </a>
                       </div>
                     </TiltCard>
+                    </ImageReveal>
                   </div>
 
                   {/* Info area */}
@@ -1140,6 +1473,9 @@ export default function HomePage() {
           </Reveal>
         </div>
       </section>
+
+      {/* Tech Modal */}
+      <TechModal tech={selectedTech} onClose={() => setSelectedTech(null)} />
     </>
   );
 }
