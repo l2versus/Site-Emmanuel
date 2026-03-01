@@ -1,0 +1,84 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# 🐳 Docker Compose — PostgreSQL 16 + Next.js App + Prisma
+# ══════════════════════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+  # ─── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: emmanuel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: emmanuel
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SuperSecurePass2026!}
+      POSTGRES_DB: clinica_estetica
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emmanuel -d clinica_estetica"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - emmanuel-network
+
+  # ─── Next.js Application ───────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emmanuel-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/clinica_estetica
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
+      MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET}
+      WHATSAPP_API_URL: ${WHATSAPP_API_URL}
+      WHATSAPP_API_KEY: ${WHATSAPP_API_KEY}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      ENCRYPTION_IV: ${ENCRYPTION_IV}
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - emmanuel-network
+
+  # ─── Prisma Studio (apenas dev) ────────────────────────────────────────────
+  prisma-studio:
+    image: node:20-alpine
+    container_name: emmanuel-prisma-studio
+    working_dir: /app
+    profiles:
+      - dev
+    command: npx prisma studio --port 5555
+    ports:
+      - "5555:5555"
+    environment:
+      DATABASE_URL: postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/clinica_estetica
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - emmanuel-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  emmanuel-network:
+    driver: bridge

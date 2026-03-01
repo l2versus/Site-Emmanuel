@@ -1,0 +1,384 @@
+// ══════════════════════════════════════════════════════════════════════════════
+// 🏗️ SCHEMA PRISMA — CLÍNICA DE ESTÉTICA PREMIUM
+// 13 Modelos de Dados com Relacionamentos Completos
+// ══════════════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── 1. USUÁRIO (Auth + Perfil) ──────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?   @unique
+  cpf           String?   @unique
+  passwordHash  String?
+  role          Role      @default(CLIENTE)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relacionamentos
+  accounts      Account[]
+  sessions      Session[]
+  agendamentos  Agendamento[]
+  anamneses     Anamnese[]
+  evolucoes     Evolucao[]
+  pagamentos    Pagamento[]
+  notificacoes  Notificacao[]
+
+  @@map("users")
+}
+
+enum Role {
+  CLIENTE
+  PROFISSIONAL
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ─── 2. CONTA OAUTH (Google, Instagram) ──────────────────────────────────────
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// ─── 3. SESSÃO DE AUTENTICAÇÃO ───────────────────────────────────────────────
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ─── 4. TOKEN DE VERIFICAÇÃO ─────────────────────────────────────────────────
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── 5. SERVIÇO / PROCEDIMENTO ───────────────────────────────────────────────
+model Servico {
+  id              String   @id @default(cuid())
+  nome            String
+  descricao       String   @db.Text
+  descricaoCurta  String?
+  categoria       CategoriaServico
+  preco           Decimal  @db.Decimal(10, 2)
+  precoPromocional Decimal? @db.Decimal(10, 2)
+  duracaoMinutos  Int
+  imagemUrl       String?
+  ativo           Boolean  @default(true)
+  destaque        Boolean  @default(false)
+  ordemExibicao   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relacionamentos
+  agendamentos Agendamento[]
+
+  @@map("servicos")
+}
+
+enum CategoriaServico {
+  FACIAL
+  CORPORAL
+  CAPILAR
+  DEPILACAO
+  MASSAGEM
+  PACOTE
+}
+
+// ─── 6. AGENDAMENTO ──────────────────────────────────────────────────────────
+model Agendamento {
+  id              String            @id @default(cuid())
+  clienteId       String
+  servicoId       String
+  profissionalId  String?
+  dataHora        DateTime
+  dataFim         DateTime
+  status          StatusAgendamento @default(PENDENTE)
+  observacoes     String?           @db.Text
+  valorTotal      Decimal           @db.Decimal(10, 2)
+  origemAgendamento OrigemAgendamento @default(SITE)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relacionamentos
+  cliente    User       @relation(fields: [clienteId], references: [id])
+  servico    Servico    @relation(fields: [servicoId], references: [id])
+  pagamento  Pagamento?
+
+  @@index([clienteId])
+  @@index([dataHora])
+  @@index([status])
+  @@map("agendamentos")
+}
+
+enum StatusAgendamento {
+  PENDENTE        // Aguardando confirmação
+  CONFIRMADO      // Pago ou confirmado manualmente
+  EM_ATENDIMENTO  // Em andamento
+  CONCLUIDO       // Finalizado com sucesso
+  CANCELADO       // Cancelado pelo cliente
+  NO_SHOW         // Paciente não compareceu
+  REAGENDADO      // Movido para outra data
+  LISTA_ESPERA    // Aguardando vaga
+}
+
+enum OrigemAgendamento {
+  SITE
+  WHATSAPP
+  CHATBOT
+  ADMIN
+  TELEFONE
+}
+
+// ─── 7. PAGAMENTO ────────────────────────────────────────────────────────────
+model Pagamento {
+  id                    String          @id @default(cuid())
+  agendamentoId         String          @unique
+  clienteId             String
+  valorOriginal         Decimal         @db.Decimal(10, 2)
+  valorPago             Decimal?        @db.Decimal(10, 2)
+  desconto              Decimal?        @db.Decimal(10, 2)
+  metodo                MetodoPagamento
+  status                StatusPagamento @default(PENDENTE)
+  mercadoPagoId         String?         @unique
+  mercadoPagoStatus     String?
+  mercadoPagoDetail     String?         @db.Text
+  pixQrCode             String?         @db.Text
+  pixQrCodeBase64       String?         @db.Text
+  pixExpiresAt          DateTime?
+  fraudeDetected        Boolean         @default(false)
+  fraudeMotivo          String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // Relacionamentos
+  agendamento Agendamento @relation(fields: [agendamentoId], references: [id])
+  cliente     User        @relation(fields: [clienteId], references: [id])
+
+  @@index([mercadoPagoId])
+  @@index([status])
+  @@map("pagamentos")
+}
+
+enum MetodoPagamento {
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  BOLETO
+  DINHEIRO
+  CORTESIA
+}
+
+enum StatusPagamento {
+  PENDENTE
+  APROVADO
+  REJEITADO
+  CANCELADO
+  REEMBOLSADO
+  EM_ANALISE
+  FRAUDE_BLOQUEADO
+}
+
+// ─── 8. ANAMNESE (Ficha Médica Criptografada) ───────────────────────────────
+model Anamnese {
+  id                    String   @id @default(cuid())
+  clienteId             String
+  // Dados criptografados AES-256 (LGPD)
+  dadosCriptografados   String   @db.Text
+  // Flags médicas (booleanos para consulta rápida sem descriptografar)
+  alergia               Boolean  @default(false)
+  diabetes              Boolean  @default(false)
+  hipertensao           Boolean  @default(false)
+  cardiopatia           Boolean  @default(false)
+  gravidez              Boolean  @default(false)
+  lactante              Boolean  @default(false)
+  marcapasso            Boolean  @default(false)
+  epilepsia             Boolean  @default(false)
+  cancer                Boolean  @default(false)
+  cirurgiaRecente       Boolean  @default(false)
+  problemaPele          Boolean  @default(false)
+  usoMedicamento        Boolean  @default(false)
+  assinaturaDigital     String?
+  consentimentoLGPD     Boolean  @default(false)
+  dataAssinatura        DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relacionamentos
+  cliente User @relation(fields: [clienteId], references: [id])
+
+  @@index([clienteId])
+  @@map("anamneses")
+}
+
+// ─── 9. EVOLUÇÃO CLÍNICA ────────────────────────────────────────────────────
+model Evolucao {
+  id              String   @id @default(cuid())
+  clienteId       String
+  dataAvaliacao   DateTime @default(now())
+  observacoes     String?  @db.Text
+  
+  // 13 Zonas de Medição Corporal (em cm)
+  abdomen         Decimal? @db.Decimal(6, 2)
+  cintura         Decimal? @db.Decimal(6, 2)
+  quadril         Decimal? @db.Decimal(6, 2)
+  coxaDireita     Decimal? @db.Decimal(6, 2)
+  coxaEsquerda    Decimal? @db.Decimal(6, 2)
+  bracoDireito    Decimal? @db.Decimal(6, 2)
+  bracoEsquerdo   Decimal? @db.Decimal(6, 2)
+  torax           Decimal? @db.Decimal(6, 2)
+  panturrilhaDir  Decimal? @db.Decimal(6, 2)
+  panturrilhaEsq  Decimal? @db.Decimal(6, 2)
+  peso            Decimal? @db.Decimal(6, 2)
+  altura          Decimal? @db.Decimal(5, 2)
+  imc             Decimal? @db.Decimal(5, 2)
+
+  // Fotos antes/depois (URLs criptografadas)
+  fotosAntes      String[] @default([])
+  fotosDepois     String[] @default([])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relacionamentos
+  cliente User @relation(fields: [clienteId], references: [id])
+
+  @@index([clienteId])
+  @@index([dataAvaliacao])
+  @@map("evolucoes")
+}
+
+// ─── 10. CONFIGURAÇÃO DO SISTEMA ─────────────────────────────────────────────
+model ConfiguracaoSistema {
+  id                    String   @id @default(cuid())
+  nomeClinica           String   @default("Emmanuel Estética Premium")
+  logoUrl               String?
+  telefone              String?
+  email                 String?
+  endereco              String?
+  cnpj                  String?
+  // Horários de funcionamento
+  horarioAbertura       String   @default("08:00")
+  horarioFechamento     String   @default("20:00")
+  intervaloMinutos      Int      @default(30)
+  diasFuncionamento     Int[]    @default([1, 2, 3, 4, 5, 6]) // 0=Dom ... 6=Sab
+  // Estética do sistema
+  corPrimaria           String   @default("#e14a72")
+  corSecundaria         String   @default("#d99c22")
+  // Redes sociais
+  instagramUrl          String?
+  facebookUrl           String?
+  whatsappNumero        String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("configuracoes_sistema")
+}
+
+// ─── 11. BLOQUEIO DE AGENDA ──────────────────────────────────────────────────
+model BloqueioAgenda {
+  id              String   @id @default(cuid())
+  titulo          String
+  dataInicio      DateTime
+  dataFim         DateTime
+  motivo          String?
+  diaTodo         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([dataInicio, dataFim])
+  @@map("bloqueios_agenda")
+}
+
+// ─── 12. NOTIFICAÇÃO ─────────────────────────────────────────────────────────
+model Notificacao {
+  id          String          @id @default(cuid())
+  userId      String
+  titulo      String
+  mensagem    String          @db.Text
+  tipo        TipoNotificacao
+  canal       CanalNotificacao
+  lida        Boolean         @default(false)
+  enviadaEm   DateTime        @default(now())
+  metadata    Json?
+
+  // Relacionamentos
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, lida])
+  @@map("notificacoes")
+}
+
+enum TipoNotificacao {
+  AGENDAMENTO_CONFIRMADO
+  AGENDAMENTO_CANCELADO
+  PAGAMENTO_APROVADO
+  PAGAMENTO_RECUSADO
+  LEMBRETE_24H
+  LEMBRETE_1H
+  EVOLUCAO_DISPONIVEL
+  PROMOCAO
+  SISTEMA
+}
+
+enum CanalNotificacao {
+  EMAIL
+  WHATSAPP
+  PUSH
+  SMS
+  IN_APP
+}
+
+// ─── 13. LOG DE AUDITORIA (Segurança) ───────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  oldData   Json?
+  newData   Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
