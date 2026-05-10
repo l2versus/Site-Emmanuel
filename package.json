@@ -1,8 +1,8 @@
 {
   "name": "eb-emmanuel-bezerra-portfolio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Portfolio Full-Stack Developer — Emmanuel Bezerra",
+  "description": "Portfolio Full-Stack Developer — Emmanuel Bezerra (with Evolution API + AI agents)",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -13,7 +13,9 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "worker": "tsx src/workers/index.ts",
+    "worker:dev": "tsx watch src/workers/index.ts"
   },
   "dependencies": {
     "next": "^15.1.0",
@@ -45,7 +47,11 @@
     "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "bullmq": "^5.34.0",
+    "ioredis": "^5.4.1",
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
@@ -61,7 +67,8 @@
     "postcss": "^8.5.0",
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.0",
-    "@tailwindcss/typography": "^0.5.16"
+    "@tailwindcss/typography": "^0.5.16",
+    "tsx": "^4.19.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

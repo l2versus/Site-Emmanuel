@@ -1,11 +1,11 @@
-# ══════════════════════════════════════════════════════════════════════════════
-# 🐳 Docker Compose — PostgreSQL 16 + Next.js App + Prisma
-# ══════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
+# 🐳 PostgreSQL 16 + Redis + Next.js App + Worker (24/7) + Prisma
+# ════════════════════════════════════════════════════════════════════════════
 
 version: "3.9"
 
 services:
-  # ─── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  # ─── PostgreSQL 16 ─────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: emmanuel-db
@@ -26,7 +26,25 @@ services:
     networks:
       - emmanuel-network
 
-  # ─── Next.js Application ───────────────────────────────────────────────────
+  # ─── Redis (BullMQ) ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: emmanuel-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - emmanuel-network
+
+  # ─── Next.js Application ───────────────────────────────────────────
   app:
     build:
       context: .
@@ -37,6 +55,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/clinica_estetica
+      REDIS_URL: redis://redis:6379
       AUTH_SECRET: ${AUTH_SECRET}
       AUTH_URL: ${AUTH_URL:-http://localhost:3000}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
@@ -44,18 +63,52 @@ services:
       MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
       MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
       MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET}
-      WHATSAPP_API_URL: ${WHATSAPP_API_URL}
-      WHATSAPP_API_KEY: ${WHATSAPP_API_KEY}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       ENCRYPTION_IV: ${ENCRYPTION_IV}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-eb-bot}
+      EVOLUTION_WEBHOOK_SECRET: ${EVOLUTION_WEBHOOK_SECRET}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL_DEFAULT: ${ANTHROPIC_MODEL_DEFAULT:-claude-sonnet-4-6}
+      AGENT_DEFAULT: ${AGENT_DEFAULT:-consultor-vendas-eb}
       NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - emmanuel-network
 
-  # ─── Prisma Studio (apenas dev) ────────────────────────────────────────────
+  # ─── Worker (24/7 agents) ────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emmanuel-worker
+    restart: unless-stopped
+    command: ["npm", "run", "worker"]
+    environment:
+      DATABASE_URL: postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/clinica_estetica
+      REDIS_URL: redis://redis:6379
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+      EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-eb-bot}
+      EVOLUTION_WEBHOOK_SECRET: ${EVOLUTION_WEBHOOK_SECRET}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL_DEFAULT: ${ANTHROPIC_MODEL_DEFAULT:-claude-sonnet-4-6}
+      AGENT_DEFAULT: ${AGENT_DEFAULT:-consultor-vendas-eb}
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - emmanuel-network
+
+  # ─── Prisma Studio (apenas dev) ────────────────────────────────────────
   prisma-studio:
     image: node:20-alpine
     container_name: emmanuel-prisma-studio
@@ -77,6 +130,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
