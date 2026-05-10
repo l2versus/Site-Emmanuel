@@ -1,7 +1,6 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "../prisma";
 import { loadAgentCached } from "./loader";
-import { anthropic, DEFAULT_MODEL } from "../llm/anthropic";
+import { groq, DEFAULT_MODEL, MAX_TOKENS } from "../llm/client";
 import { isKilled } from "../security/kill-switch";
 import { detectInjection, SAFE_REFUSAL } from "../security/injection";
 
@@ -40,8 +39,10 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
   // 2) Injection detection (camada 1 — antes do LLM)
   const injection = detectInjection(userMessage);
 
-  // 3) Carrega agente
+  // 3) Carrega agente (model_recommendation do MD é dica;
+  //    runtime usa env.LLM_DEFAULT_MODEL para garantir compatibilidade com o provider).
   const agent = await loadAgentCached(agentName);
+  const modelInUse = DEFAULT_MODEL;
   const startedAt = Date.now();
 
   const run = await prisma.agentRun.create({
@@ -49,7 +50,7 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
       conversationId,
       agente: agentName,
       versaoPrompt: agent.version,
-      modelo: agent.modelRecommendation || DEFAULT_MODEL,
+      modelo: modelInUse,
       input: { userMessage, injection },
       status: "EM_EXECUCAO",
       injectionDetectada: injection.detected,
@@ -78,20 +79,14 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
     take: 20,
   });
 
-  // 6) Chama LLM com prompt caching no system prompt
+  // 6) Chama LLM (Groq Chat Completions — OpenAI-compatible API)
   try {
-    const response = await anthropic.messages.create({
-      model: agent.modelRecommendation || DEFAULT_MODEL,
-      max_tokens: 1024,
+    const completion = await groq.chat.completions.create({
+      model: modelInUse,
+      max_tokens: MAX_TOKENS,
       temperature: agent.temperature,
-      system: [
-        {
-          type: "text",
-          text: agent.systemPrompt,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
       messages: [
+        { role: "system", content: agent.systemPrompt },
         ...history.map((m) => ({
           role: m.direcao === "INBOUND" ? ("user" as const) : ("assistant" as const),
           content: m.conteudo,
@@ -100,18 +95,17 @@ export async function runAgent(input: RunInput): Promise<RunResult> {
       ],
     });
 
-    const text = response.content
-      .filter((b: Anthropic.ContentBlock): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("");
+    const text = completion.choices[0]?.message?.content?.trim() ?? "";
+    const inputTokens = completion.usage?.prompt_tokens ?? null;
+    const outputTokens = completion.usage?.completion_tokens ?? null;
 
     await prisma.agentRun.update({
       where: { id: run.id },
       data: {
         status: "CONCLUIDO",
         output: text,
-        inputTokens: response.usage.input_tokens,
-        outputTokens: response.usage.output_tokens,
+        inputTokens,
+        outputTokens,
         finishedAt: new Date(),
         latenciaMs: Date.now() - startedAt,
       },

@@ -1,8 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { env } from "../env";
-
-export const anthropic = new Anthropic({
-  apiKey: env.ANTHROPIC_API_KEY,
-});
-
-export const DEFAULT_MODEL = env.ANTHROPIC_MODEL_DEFAULT;
+// DEPRECATED: substituído por ./client.ts (Groq) na v0.2.
+// Mantido temporáriamente para não quebrar imports antigos.
+// Pode ser removido com segurança.
+export {};

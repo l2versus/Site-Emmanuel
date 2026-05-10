@@ -1,5 +1,11 @@
 # ════════════════════════════════════════════════════════════════════════════
-# 🐳 PostgreSQL 16 + Redis + Next.js App + Worker (24/7) + Prisma
+# 🐳 Docker Compose — Stack EB (Postgres + Redis + Worker + Evolution + App)
+#
+# Profiles:
+#   default          → dev local: postgres + redis + app + worker
+#   --profile vps    → produção no VPS: postgres + worker + evolution-api
+#                       (web vai pra Vercel, redis vai pro Upstash)
+#   --profile dev    → ferramentas extra (prisma-studio)
 # ════════════════════════════════════════════════════════════════════════════
 
 version: "3.9"
@@ -26,7 +32,7 @@ services:
     networks:
       - emmanuel-network
 
-  # ─── Redis (BullMQ) ───────────────────────────────────────────────
+  # ─── Redis (apenas dev local; em prod use Upstash) ─────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: emmanuel-redis
@@ -44,7 +50,7 @@ services:
     networks:
       - emmanuel-network
 
-  # ─── Next.js Application ───────────────────────────────────────────
+  # ─── Next.js App (dev local; em prod a Vercel hospeda) ──────────────────────────
   app:
     build:
       context: .
@@ -69,8 +75,8 @@ services:
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
       EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-eb-bot}
       EVOLUTION_WEBHOOK_SECRET: ${EVOLUTION_WEBHOOK_SECRET}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      ANTHROPIC_MODEL_DEFAULT: ${ANTHROPIC_MODEL_DEFAULT:-claude-sonnet-4-6}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      LLM_DEFAULT_MODEL: ${LLM_DEFAULT_MODEL:-llama-3.3-70b-versatile}
       AGENT_DEFAULT: ${AGENT_DEFAULT:-consultor-vendas-eb}
       NODE_ENV: production
     depends_on:
@@ -81,7 +87,7 @@ services:
     networks:
       - emmanuel-network
 
-  # ─── Worker (24/7 agents) ────────────────────────────────────────────
+  # ─── Worker 24/7 (roda no VPS em prod) ──────────────────────────────────────────
   worker:
     build:
       context: .
@@ -90,31 +96,64 @@ services:
     restart: unless-stopped
     command: ["npm", "run", "worker"]
     environment:
-      DATABASE_URL: postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/clinica_estetica
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: ${DATABASE_URL:-postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/clinica_estetica}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       EVOLUTION_API_URL: ${EVOLUTION_API_URL}
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
       EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE:-eb-bot}
       EVOLUTION_WEBHOOK_SECRET: ${EVOLUTION_WEBHOOK_SECRET}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      ANTHROPIC_MODEL_DEFAULT: ${ANTHROPIC_MODEL_DEFAULT:-claude-sonnet-4-6}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      LLM_DEFAULT_MODEL: ${LLM_DEFAULT_MODEL:-llama-3.3-70b-versatile}
       AGENT_DEFAULT: ${AGENT_DEFAULT:-consultor-vendas-eb}
       NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+    networks:
+      - emmanuel-network
+
+  # ─── Evolution API (auto-hospedada no VPS) ─────────────────────────────────────
+  evolution-api:
+    image: atendai/evolution-api:latest
+    container_name: emmanuel-evolution
+    profiles: ["vps"]
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_TYPE: http
+      SERVER_PORT: 8080
+      CORS_ORIGIN: "*"
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://emmanuel:${DB_PASSWORD:-SuperSecurePass2026!}@postgres:5432/evolution
+      DATABASE_CONNECTION_CLIENT_NAME: evolution-api
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "false"
+      WEBHOOK_GLOBAL_URL: ${WEBHOOK_GLOBAL_URL}
+      WEBHOOK_GLOBAL_ENABLED: "true"
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: "false"
+      WEBHOOK_EVENTS_MESSAGES_UPSERT: "true"
+      LOG_LEVEL: "ERROR,WARN,INFO"
+      LOG_COLOR: "true"
+      DEL_INSTANCE: "false"
+      QRCODE_LIMIT: "30"
+      LANGUAGE: "pt-BR"
+    volumes:
+      - evolution_instances:/evolution/instances
+      - evolution_store:/evolution/store
+    depends_on:
+      postgres:
         condition: service_healthy
     networks:
       - emmanuel-network
 
-  # ─── Prisma Studio (apenas dev) ────────────────────────────────────────
+  # ─── Prisma Studio (apenas dev) ────────────────────────────────────────────────
   prisma-studio:
     image: node:20-alpine
     container_name: emmanuel-prisma-studio
     working_dir: /app
-    profiles:
-      - dev
+    profiles: ["dev"]
     command: npx prisma studio --port 5555
     ports:
       - "5555:5555"
@@ -132,6 +171,10 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  evolution_instances:
+    driver: local
+  evolution_store:
     driver: local
 
 networks:

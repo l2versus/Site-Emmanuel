@@ -1,8 +1,8 @@
 {
   "name": "eb-emmanuel-bezerra-portfolio",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
-  "description": "Portfolio Full-Stack Developer — Emmanuel Bezerra (with Evolution API + AI agents)",
+  "description": "Portfolio Full-Stack Developer — Emmanuel Bezerra (Evolution API + Groq agents 24/7)",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -48,7 +48,7 @@
     "@radix-ui/react-tooltip": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
     "sharp": "^0.33.0",
-    "@anthropic-ai/sdk": "^0.39.0",
+    "groq-sdk": "^0.15.0",
     "bullmq": "^5.34.0",
     "ioredis": "^5.4.1",
     "gray-matter": "^4.0.3"
