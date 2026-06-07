@@ -1,6 +1,6 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // 📋 Página de Orçamento — EB Emmanuel Bezerra
-// Design Premium com formulário interativo e showcase de tecnologias
+// Form de baixo atrito: 4 campos + envio direto pro WhatsApp
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
@@ -10,8 +10,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Code2,
-  Server,
   Layers,
   Check,
   Send,
@@ -24,13 +22,13 @@ import {
   Globe,
   Smartphone,
   ShoppingCart,
-  BarChart3,
-  MessageSquare,
-  Calendar,
   ChevronRight,
   Star,
   BadgeCheck,
 } from "lucide-react";
+
+// Número de WhatsApp (formato internacional, sem símbolos)
+const WHATSAPP_NUMBER = "5585998500344";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DATA
@@ -42,7 +40,6 @@ const projectTypes = [
     icon: Globe,
     title: "Landing Page",
     desc: "Página única focada em conversão",
-    price: "A partir de R$ 1.500",
     features: ["Design responsivo", "SEO otimizado", "Formulário de contato", "Analytics integrado"],
     timeline: "7-14 dias",
     color: "#00f0ff",
@@ -52,7 +49,6 @@ const projectTypes = [
     icon: Layers,
     title: "Site Institucional",
     desc: "Múltiplas páginas com CMS",
-    price: "A partir de R$ 3.000",
     features: ["Até 10 páginas", "Painel admin", "Blog integrado", "Otimização de performance"],
     timeline: "15-30 dias",
     color: "#ff00ff",
@@ -62,7 +58,6 @@ const projectTypes = [
     icon: ShoppingCart,
     title: "E-commerce",
     desc: "Loja virtual completa",
-    price: "A partir de R$ 6.000",
     features: ["Catálogo de produtos", "Carrinho + checkout", "Gateway de pagamento", "Gestão de pedidos"],
     timeline: "30-60 dias",
     color: "#00ff41",
@@ -72,7 +67,6 @@ const projectTypes = [
     icon: Rocket,
     title: "Web App / SaaS",
     desc: "Sistema web personalizado",
-    price: "Sob consulta",
     features: ["Autenticação segura", "Dashboard interativo", "APIs customizadas", "Integrações"],
     timeline: "45-90 dias",
     color: "#ffaa00",
@@ -82,18 +76,10 @@ const projectTypes = [
     icon: Smartphone,
     title: "App Mobile",
     desc: "React Native / PWA",
-    price: "Sob consulta",
     features: ["iOS + Android", "Notificações push", "Modo offline", "Publicação nas lojas"],
     timeline: "60-120 dias",
     color: "#aa00ff",
   },
-];
-
-const addons = [
-  { id: "chatbot", icon: MessageSquare, title: "Chatbot com IA", price: "+ R$ 800" },
-  { id: "analytics", icon: BarChart3, title: "Dashboard Analytics", price: "+ R$ 1.200" },
-  { id: "schedule", icon: Calendar, title: "Sistema de Agendamento", price: "+ R$ 1.500" },
-  { id: "payments", icon: ShoppingCart, title: "Integração Pagamentos", price: "+ R$ 1.000" },
 ];
 
 const techShowcase = [
@@ -168,55 +154,37 @@ function Reveal({
 
 export default function OrcamentoPage() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    company: "",
+    investment: "",
     description: "",
-    budget: "",
-    deadline: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const toggleAddon = (id: string) => {
-    setSelectedAddons((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    // Simula envio (substituir por integração real)
-    await new Promise((r) => setTimeout(r, 2000));
-
-    // Monta mensagem para WhatsApp
+    // Monta a mensagem para o WhatsApp
     const selectedProject = projectTypes.find((p) => p.id === selectedType);
-    const selectedAddonNames = selectedAddons
-      .map((id) => addons.find((a) => a.id === id)?.title)
-      .filter(Boolean)
-      .join(", ");
-
     const message = encodeURIComponent(
-      `🚀 *Novo Orçamento*\n\n` +
+      `🚀 *Novo Orçamento — pelo site*\n\n` +
         `*Nome:* ${formData.name}\n` +
-        `*Email:* ${formData.email}\n` +
-        `*Telefone:* ${formData.phone}\n` +
-        `*Empresa:* ${formData.company || "Não informado"}\n\n` +
-        `*Tipo de Projeto:* ${selectedProject?.title || "Não selecionado"}\n` +
-        `*Recursos Adicionais:* ${selectedAddonNames || "Nenhum"}\n` +
-        `*Orçamento Estimado:* ${formData.budget || "Não informado"}\n` +
-        `*Prazo Desejado:* ${formData.deadline || "Não informado"}\n\n` +
-        `*Descrição do Projeto:*\n${formData.description}`
+        `*E-mail:* ${formData.email}\n` +
+        `*WhatsApp:* ${formData.phone}\n` +
+        `*Investimento pretendido:* ${formData.investment}\n` +
+        (selectedProject ? `*Tipo de projeto:* ${selectedProject.title}\n` : "") +
+        (formData.description ? `\n*Sobre o projeto:*\n${formData.description}` : "")
     );
 
-    window.open(`https://wa.me/5585998500344?text=${message}`, "_blank");
+    // IMPORTANTE: abrir de forma SÍNCRONA dentro do clique preserva o "user gesture"
+    // e evita que o navegador (sobretudo no mobile) bloqueie o WhatsApp.
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    const win = window.open(url, "_blank");
+    if (!win) window.location.href = url; // fallback (popup bloqueado / mobile)
+
     setSubmitted(true);
-    setIsSubmitting(false);
   };
 
   return (
@@ -226,27 +194,24 @@ export default function OrcamentoPage() {
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-[#00f0ff]/[0.03] rounded-full blur-[150px] pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-[#ff00ff]/[0.03] rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Header */}
-      <header className="relative z-10 py-6 border-b border-[#1e1e2e]">
-        <div className="mx-auto max-w-6xl px-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-[#6b6b80] hover:text-[#00f0ff] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao portfólio
-          </Link>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="relative z-10 py-20 text-center">
+      {/* Hero (pt-28 garante espaço pra nav global fixa) */}
+      <section className="relative z-10 pt-28 pb-16 text-center">
         <div className="mx-auto max-w-4xl px-6">
           <Reveal>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-[#6b6b80] hover:text-[#00f0ff] transition-colors mb-10"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar ao portfólio
+            </Link>
+          </Reveal>
+
+          <Reveal delay={0.05}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-8">
               <Sparkles className="w-4 h-4 text-[#00f0ff]" />
               <span className="text-sm font-mono text-[#00f0ff]">
-                Orçamento Personalizado
+                Orçamento sem compromisso
               </span>
             </div>
           </Reveal>
@@ -261,8 +226,8 @@ export default function OrcamentoPage() {
 
           <Reveal delay={0.2}>
             <p className="text-lg text-[#6b6b80] max-w-2xl mx-auto">
-              Preencha o formulário abaixo para receber um orçamento detalhado
-              e personalizado para o seu projeto. Respondo em até 24 horas.
+              Preencha 4 campos rápidos e seu pedido cai direto no meu WhatsApp.
+              Respondo pessoalmente em até 24 horas — sem robô, sem enrolação.
             </p>
           </Reveal>
         </div>
@@ -291,7 +256,7 @@ export default function OrcamentoPage() {
 
       {/* Form Section */}
       <section className="relative z-10 py-20">
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-5xl px-6">
           <AnimatePresence mode="wait">
             {!submitted ? (
               <motion.form
@@ -300,19 +265,24 @@ export default function OrcamentoPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, y: -20 }}
                 onSubmit={handleSubmit}
-                className="space-y-16"
+                className="space-y-14"
               >
-                {/* Step 1: Project Type */}
+                {/* Step 1: Project Type (opcional) */}
                 <div>
                   <Reveal>
-                    <div className="flex items-center gap-3 mb-8">
+                    <div className="flex items-center gap-3 mb-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00f0ff] text-black text-sm font-bold">
                         1
                       </div>
                       <h2 className="text-2xl font-bold text-white">
-                        Tipo de Projeto
+                        Tipo de projeto{" "}
+                        <span className="text-[#6b6b80] text-base font-normal">(opcional)</span>
                       </h2>
                     </div>
+                    <p className="text-sm text-[#6b6b80] mb-8 ml-11">
+                      Se já tiver uma ideia, escolha abaixo. Se não souber, deixa em branco que a
+                      gente define junto.
+                    </p>
                   </Reveal>
 
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -322,7 +292,9 @@ export default function OrcamentoPage() {
                           type="button"
                           whileHover={{ y: -4, scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => setSelectedType(type.id)}
+                          onClick={() =>
+                            setSelectedType((prev) => (prev === type.id ? null : type.id))
+                          }
                           className={`relative w-full text-left p-6 rounded-2xl border transition-all duration-300 ${
                             selectedType === type.id
                               ? "border-[#00f0ff]/50 bg-[#00f0ff]/5"
@@ -358,17 +330,14 @@ export default function OrcamentoPage() {
                             {type.desc}
                           </p>
 
-                          <div className="flex items-center justify-between text-sm">
-                            <span style={{ color: type.color }} className="font-semibold">
-                              {type.price}
-                            </span>
+                          <div className="flex items-center justify-end text-sm">
                             <span className="text-[#6b6b80] flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {type.timeline}
                             </span>
                           </div>
 
-                          {/* Features on hover/selected */}
+                          {/* Features quando selecionado */}
                           <AnimatePresence>
                             {selectedType === type.id && (
                               <motion.ul
@@ -392,70 +361,21 @@ export default function OrcamentoPage() {
                   </div>
                 </div>
 
-                {/* Step 2: Addons */}
-                <div>
-                  <Reveal>
-                    <div className="flex items-center gap-3 mb-8">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff00ff] text-black text-sm font-bold">
-                        2
-                      </div>
-                      <h2 className="text-2xl font-bold text-white">
-                        Recursos Adicionais{" "}
-                        <span className="text-[#6b6b80] text-base font-normal">(opcional)</span>
-                      </h2>
-                    </div>
-                  </Reveal>
-
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {addons.map((addon, i) => (
-                      <Reveal key={addon.id} delay={i * 0.05}>
-                        <motion.button
-                          type="button"
-                          whileHover={{ y: -2 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => toggleAddon(addon.id)}
-                          className={`relative w-full p-4 rounded-xl border text-left transition-all duration-300 ${
-                            selectedAddons.includes(addon.id)
-                              ? "border-[#ff00ff]/50 bg-[#ff00ff]/5"
-                              : "border-[#1e1e2e] bg-[#0f0f18] hover:border-[#1e1e2e]/80"
-                          }`}
-                        >
-                          {selectedAddons.includes(addon.id) && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff00ff] text-black"
-                            >
-                              <Check className="w-3 h-3" />
-                            </motion.div>
-                          )}
-
-                          <addon.icon className="w-5 h-5 text-[#ff00ff] mb-2" />
-                          <div className="text-sm font-semibold text-white mb-1">
-                            {addon.title}
-                          </div>
-                          <div className="text-xs text-[#ff00ff]">{addon.price}</div>
-                        </motion.button>
-                      </Reveal>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Step 3: Contact Info */}
+                {/* Step 2: Seus dados */}
                 <div>
                   <Reveal>
                     <div className="flex items-center gap-3 mb-8">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00ff41] text-black text-sm font-bold">
-                        3
+                        2
                       </div>
                       <h2 className="text-2xl font-bold text-white">
-                        Suas Informações
+                        Seus dados
                       </h2>
                     </div>
                   </Reveal>
 
                   <Reveal delay={0.1}>
-                    <div className="grid sm:grid-cols-2 gap-6 max-w-4xl">
+                    <div className="grid sm:grid-cols-2 gap-6 max-w-3xl">
                       <div>
                         <label className="block text-sm font-medium text-[#9999ab] mb-2">
                           Nome completo *
@@ -472,7 +392,7 @@ export default function OrcamentoPage() {
 
                       <div>
                         <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Email *
+                          E-mail *
                         </label>
                         <input
                           type="email"
@@ -500,64 +420,33 @@ export default function OrcamentoPage() {
 
                       <div>
                         <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Empresa / Marca
+                          Quanto pretende investir? *
                         </label>
                         <input
                           type="text"
-                          value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                          required
+                          value={formData.investment}
+                          onChange={(e) => setFormData({ ...formData, investment: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                          placeholder="Nome da empresa"
+                          placeholder="Ex: R$ 1.000"
                         />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Orçamento estimado
-                        </label>
-                        <select
-                          value={formData.budget}
-                          onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                        >
-                          <option value="">Selecione...</option>
-                          <option value="ate-2k">Até R$ 2.000</option>
-                          <option value="2k-5k">R$ 2.000 - R$ 5.000</option>
-                          <option value="5k-10k">R$ 5.000 - R$ 10.000</option>
-                          <option value="10k-20k">R$ 10.000 - R$ 20.000</option>
-                          <option value="acima-20k">Acima de R$ 20.000</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Prazo desejado
-                        </label>
-                        <select
-                          value={formData.deadline}
-                          onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                        >
-                          <option value="">Selecione...</option>
-                          <option value="urgente">Urgente (menos de 15 dias)</option>
-                          <option value="1-mes">1 mês</option>
-                          <option value="2-meses">2 meses</option>
-                          <option value="3-meses">3 meses ou mais</option>
-                          <option value="flexivel">Flexível</option>
-                        </select>
+                        <p className="mt-2 text-xs text-[#6b6b80]">
+                          Projetos a partir de R$ 1.000. Me diz sua faixa que eu monto a melhor
+                          solução pra ela.
+                        </p>
                       </div>
 
                       <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Descreva seu projeto *
+                          Conte sobre seu projeto{" "}
+                          <span className="text-[#6b6b80] font-normal">(opcional)</span>
                         </label>
                         <textarea
-                          required
-                          rows={5}
+                          rows={4}
                           value={formData.description}
                           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors resize-none"
-                          placeholder="Descreva sua ideia, funcionalidades desejadas, referências de sites que gosta, público-alvo..."
+                          placeholder="Ideia, funcionalidades, referências de sites que você curte, público-alvo..."
                         />
                       </div>
                     </div>
@@ -568,34 +457,22 @@ export default function OrcamentoPage() {
                     <div className="mt-10">
                       <motion.button
                         type="submit"
-                        disabled={isSubmitting || !selectedType}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="inline-flex items-center gap-3 px-10 py-4 rounded-xl font-bold text-black bg-[#00f0ff] hover:shadow-[0_0_40px_rgba(0,240,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                        className="inline-flex items-center gap-3 px-10 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.4)] transition-all duration-300"
                       >
-                        {isSubmitting ? (
-                          <>
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                              className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full"
-                            />
-                            Enviando...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-5 h-5" />
-                            Solicitar Orçamento
-                            <ChevronRight className="w-4 h-4" />
-                          </>
-                        )}
+                        <Send className="w-5 h-5" />
+                        Receber meu orçamento no WhatsApp
+                        <ChevronRight className="w-4 h-4" />
                       </motion.button>
 
-                      {!selectedType && (
-                        <p className="text-sm text-[#ff00ff] mt-3">
-                          * Selecione um tipo de projeto para continuar
-                        </p>
-                      )}
+                      <p className="text-sm text-[#6b6b80] mt-4 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-[#00ff41]">✓</span> Resposta em até 24h
+                        <span className="text-[#1e1e2e]">•</span>
+                        <span className="text-[#00ff41]">✓</span> Sem compromisso
+                        <span className="text-[#1e1e2e]">•</span>
+                        <span className="text-[#00ff41]">✓</span> Você fala direto comigo
+                      </p>
                     </div>
                   </Reveal>
                 </div>
@@ -617,20 +494,32 @@ export default function OrcamentoPage() {
                 </motion.div>
 
                 <h2 className="text-3xl font-bold text-white mb-4">
-                  Orçamento Enviado!
+                  Quase lá! 🚀
                 </h2>
                 <p className="text-[#6b6b80] mb-8">
-                  Recebi sua solicitação e responderei em até 24 horas pelo
-                  WhatsApp ou email. Fique de olho!
+                  Abri o WhatsApp com seu pedido pronto — é só apertar enviar.
+                  Se não abriu automaticamente, toque no botão abaixo.
                 </p>
 
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-[#00f0ff] border border-[#00f0ff]/30 hover:bg-[#00f0ff]/10 transition-colors"
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.4)] transition-all mb-6"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  Voltar ao Portfólio
-                </Link>
+                  <Zap className="w-5 h-5" />
+                  Abrir o WhatsApp
+                </a>
+
+                <div>
+                  <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-[#00f0ff] border border-[#00f0ff]/30 hover:bg-[#00f0ff]/10 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Voltar ao Portfólio
+                  </Link>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -699,7 +588,9 @@ export default function OrcamentoPage() {
 
           <Reveal delay={0.3}>
             <a
-              href="https://wa.me/5585998500344"
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                "Olá Emmanuel! Vi seu portfólio e quero conversar sobre um projeto."
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.4)] transition-all"
