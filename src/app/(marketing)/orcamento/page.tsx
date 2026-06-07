@@ -1,11 +1,11 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // 📋 Página de Orçamento — EB Emmanuel Bezerra
-// Form de baixo atrito: 4 campos + envio direto pro WhatsApp
+// Estilo editorial (serifa + paleta quente), de baixo atrito: envio direto pro WhatsApp
 // ══════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -13,8 +13,6 @@ import {
   Layers,
   Check,
   Send,
-  Sparkles,
-  Zap,
   Clock,
   Shield,
   Headphones,
@@ -23,8 +21,8 @@ import {
   Smartphone,
   ShoppingCart,
   ChevronRight,
-  Star,
   BadgeCheck,
+  MessageCircle,
 } from "lucide-react";
 
 // Número de WhatsApp (formato internacional, sem símbolos)
@@ -42,16 +40,14 @@ const projectTypes = [
     desc: "Página única focada em conversão",
     features: ["Design responsivo", "SEO otimizado", "Formulário de contato", "Analytics integrado"],
     timeline: "7-14 dias",
-    color: "#00f0ff",
   },
   {
     id: "institucional",
     icon: Layers,
     title: "Site Institucional",
     desc: "Múltiplas páginas com CMS",
-    features: ["Até 10 páginas", "Painel admin", "Blog integrado", "Otimização de performance"],
+    features: ["Até 10 páginas", "Painel admin", "Blog integrado", "Performance otimizada"],
     timeline: "15-30 dias",
-    color: "#ff00ff",
   },
   {
     id: "ecommerce",
@@ -60,7 +56,6 @@ const projectTypes = [
     desc: "Loja virtual completa",
     features: ["Catálogo de produtos", "Carrinho + checkout", "Gateway de pagamento", "Gestão de pedidos"],
     timeline: "30-60 dias",
-    color: "#00ff41",
   },
   {
     id: "webapp",
@@ -69,7 +64,6 @@ const projectTypes = [
     desc: "Sistema web personalizado",
     features: ["Autenticação segura", "Dashboard interativo", "APIs customizadas", "Integrações"],
     timeline: "45-90 dias",
-    color: "#ffaa00",
   },
   {
     id: "mobile",
@@ -78,40 +72,34 @@ const projectTypes = [
     desc: "React Native / PWA",
     features: ["iOS + Android", "Notificações push", "Modo offline", "Publicação nas lojas"],
     timeline: "60-120 dias",
-    color: "#aa00ff",
   },
 ];
 
 const techShowcase = [
   {
-    name: "Next.js 14",
-    desc: "Framework React de última geração com Server Components, otimização automática de imagens e SEO perfeito. Seu site carrega em milissegundos.",
-    icon: "▲",
-    color: "#fff",
+    name: "Next.js",
+    desc: "Framework React de última geração com Server Components e SEO impecável. Seu site carrega em milissegundos.",
+    glyph: "▲",
   },
   {
     name: "TypeScript",
-    desc: "Código 100% tipado significa menos bugs, manutenção mais fácil e confiabilidade. É o padrão da indústria para projetos sérios.",
-    icon: "TS",
-    color: "#3178c6",
+    desc: "Código 100% tipado significa menos bugs e manutenção mais fácil. É o padrão da indústria para projetos sérios.",
+    glyph: "TS",
   },
   {
     name: "Tailwind CSS",
-    desc: "Sistema de design moderno que garante consistência visual, responsividade perfeita em todos os dispositivos e performance CSS otimizada.",
-    icon: "🎨",
-    color: "#38bdf8",
+    desc: "Sistema de design moderno que garante consistência visual e responsividade perfeita em qualquer tela.",
+    glyph: "✦",
   },
   {
     name: "PostgreSQL + Prisma",
-    desc: "Banco de dados enterprise-grade com queries otimizadas. Seus dados ficam seguros, organizados e acessíveis de forma eficiente.",
-    icon: "◆",
-    color: "#2d3748",
+    desc: "Banco de dados enterprise com queries otimizadas. Seus dados ficam seguros, organizados e acessíveis.",
+    glyph: "◆",
   },
   {
     name: "Vercel / AWS",
-    desc: "Infraestrutura de nível mundial com CDN global, SSL automático, backups e escalabilidade infinita. O mesmo que Netflix e Airbnb usam.",
-    icon: "☁️",
-    color: "#ff9900",
+    desc: "Infraestrutura de nível mundial com CDN global, SSL automático e escalabilidade. O mesmo que a Netflix usa.",
+    glyph: "☁",
   },
 ];
 
@@ -137,14 +125,23 @@ function Reveal({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
     </motion.div>
+  );
+}
+
+// Rótulo monoespaçado em caixa alta (assinatura visual do site)
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="font-mono text-[0.7rem] uppercase tracking-[0.35em] text-[#a8977f]">
+      {children}
+    </span>
   );
 }
 
@@ -188,64 +185,66 @@ export default function OrcamentoPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] overflow-hidden">
-      {/* Backgrounds */}
-      <div className="fixed inset-0 cyber-grid opacity-20 pointer-events-none" />
-      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-[#00f0ff]/[0.03] rounded-full blur-[150px] pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-[#ff00ff]/[0.03] rounded-full blur-[150px] pointer-events-none" />
+    <div className="relative min-h-screen overflow-hidden bg-[#0a0907] text-[#f3ece1] antialiased">
+      {/* ─── Fundo quente (sem neon) ─────────────────────────────────────── */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute left-1/2 top-[-10%] h-[60vh] w-[60vh] -translate-x-1/2 rounded-full bg-[#e8a36b]/[0.07] blur-[150px]" />
+        <div className="absolute bottom-[-15%] right-[-5%] h-[50vh] w-[50vh] rounded-full bg-[#b9763f]/[0.06] blur-[160px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_40%,#070605_100%)]" />
+      </div>
 
-      {/* Hero (pt-28 garante espaço pra nav global fixa) */}
-      <section className="relative z-10 pt-28 pb-16 text-center">
-        <div className="mx-auto max-w-4xl px-6">
+      {/* ─── Hero ────────────────────────────────────────────────────────── */}
+      <section className="relative z-10 px-6 pt-28 pb-16 text-center">
+        <div className="mx-auto max-w-3xl">
           <Reveal>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm text-[#6b6b80] hover:text-[#00f0ff] transition-colors mb-10"
+              className="mb-10 inline-flex items-center gap-2 text-sm text-[#9c9286] transition-colors hover:text-[#f0a875]"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="h-4 w-4" />
               Voltar ao portfólio
             </Link>
           </Reveal>
 
           <Reveal delay={0.05}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#00f0ff]/20 bg-[#00f0ff]/5 mb-8">
-              <Sparkles className="w-4 h-4 text-[#00f0ff]" />
-              <span className="text-sm font-mono text-[#00f0ff]">
-                Orçamento sem compromisso
-              </span>
+            <div className="mb-7 inline-flex items-center gap-3">
+              <span className="h-px w-8 bg-[#f0a875]/40" />
+              <Eyebrow>Orçamento · sem compromisso</Eyebrow>
+              <span className="h-px w-8 bg-[#f0a875]/40" />
             </div>
           </Reveal>
 
           <Reveal delay={0.1}>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight">
-              Vamos transformar sua
+            <h1 className="font-display text-4xl leading-[1.1] tracking-tight text-[#f4ede2] sm:text-5xl lg:text-6xl">
+              Vamos transformar sua ideia
               <br />
-              <span className="gradient-text-cyber">ideia em realidade</span>
+              em{" "}
+              <span className="italic text-[#f0a875]">algo memorável</span>
             </h1>
           </Reveal>
 
           <Reveal delay={0.2}>
-            <p className="text-lg text-[#6b6b80] max-w-2xl mx-auto">
-              Preencha 4 campos rápidos e seu pedido cai direto no meu WhatsApp.
+            <p className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-[#9c9286] sm:text-lg">
+              Preencha alguns campos rápidos e seu pedido cai direto no meu WhatsApp.
               Respondo pessoalmente em até 24 horas — sem robô, sem enrolação.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* Guarantees */}
-      <section className="relative z-10 py-12 border-y border-[#1e1e2e] bg-[#0a0a0f]/80">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* ─── Garantias ───────────────────────────────────────────────────── */}
+      <section className="relative z-10 border-y border-[#f3ece1]/[0.07] bg-[#0c0a08]/60 py-12">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
             {guarantees.map((g, i) => (
-              <Reveal key={g.title} delay={i * 0.1}>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#00f0ff]/10 text-[#00f0ff]">
-                    <g.icon className="w-5 h-5" />
+              <Reveal key={g.title} delay={i * 0.08}>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full border border-[#f0a875]/25 bg-[#f0a875]/10 text-[#f0a875]">
+                    <g.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white">{g.title}</div>
-                    <div className="text-xs text-[#6b6b80]">{g.desc}</div>
+                    <div className="text-sm font-semibold text-[#f4ede2]">{g.title}</div>
+                    <div className="text-xs leading-snug text-[#9c9286]">{g.desc}</div>
                   </div>
                 </div>
               </Reveal>
@@ -254,309 +253,230 @@ export default function OrcamentoPage() {
         </div>
       </section>
 
-      {/* Form Section */}
+      {/* ─── Formulário / Sucesso ────────────────────────────────────────── */}
       <section className="relative z-10 py-20">
         <div className="mx-auto max-w-5xl px-6">
-          <AnimatePresence mode="wait">
-            {!submitted ? (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -20 }}
-                onSubmit={handleSubmit}
-                className="space-y-14"
-              >
-                {/* Step 1: Project Type (opcional) */}
-                <div>
-                  <Reveal>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00f0ff] text-black text-sm font-bold">
-                        1
-                      </div>
-                      <h2 className="text-2xl font-bold text-white">
-                        Tipo de projeto{" "}
-                        <span className="text-[#6b6b80] text-base font-normal">(opcional)</span>
-                      </h2>
-                    </div>
-                    <p className="text-sm text-[#6b6b80] mb-8 ml-11">
-                      Se já tiver uma ideia, escolha abaixo. Se não souber, deixa em branco que a
-                      gente define junto.
-                    </p>
-                  </Reveal>
-
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {projectTypes.map((type, i) => (
-                      <Reveal key={type.id} delay={i * 0.05}>
-                        <motion.button
-                          type="button"
-                          whileHover={{ y: -4, scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() =>
-                            setSelectedType((prev) => (prev === type.id ? null : type.id))
-                          }
-                          className={`relative w-full text-left p-6 rounded-2xl border transition-all duration-300 ${
-                            selectedType === type.id
-                              ? "border-[#00f0ff]/50 bg-[#00f0ff]/5"
-                              : "border-[#1e1e2e] bg-[#0f0f18] hover:border-[#1e1e2e]/80"
-                          }`}
-                        >
-                          {/* Selected indicator */}
-                          {selectedType === type.id && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="absolute top-4 right-4 flex h-6 w-6 items-center justify-center rounded-full bg-[#00f0ff] text-black"
-                            >
-                              <Check className="w-4 h-4" />
-                            </motion.div>
-                          )}
-
-                          <div
-                            className="flex h-12 w-12 items-center justify-center rounded-xl mb-4"
-                            style={{
-                              background: `${type.color}15`,
-                              border: `1px solid ${type.color}25`,
-                              color: type.color,
-                            }}
-                          >
-                            <type.icon className="w-6 h-6" />
-                          </div>
-
-                          <h3 className="text-lg font-bold text-white mb-1">
-                            {type.title}
-                          </h3>
-                          <p className="text-sm text-[#6b6b80] mb-4">
-                            {type.desc}
-                          </p>
-
-                          <div className="flex items-center justify-end text-sm">
-                            <span className="text-[#6b6b80] flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {type.timeline}
-                            </span>
-                          </div>
-
-                          {/* Features quando selecionado */}
-                          <AnimatePresence>
-                            {selectedType === type.id && (
-                              <motion.ul
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="mt-4 pt-4 border-t border-[#1e1e2e] space-y-2 overflow-hidden"
-                              >
-                                {type.features.map((f) => (
-                                  <li key={f} className="flex items-center gap-2 text-sm text-[#9999ab]">
-                                    <Check className="w-3 h-3 text-[#00ff41]" />
-                                    {f}
-                                  </li>
-                                ))}
-                              </motion.ul>
-                            )}
-                          </AnimatePresence>
-                        </motion.button>
-                      </Reveal>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Step 2: Seus dados */}
-                <div>
-                  <Reveal>
-                    <div className="flex items-center gap-3 mb-8">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00ff41] text-black text-sm font-bold">
-                        2
-                      </div>
-                      <h2 className="text-2xl font-bold text-white">
-                        Seus dados
-                      </h2>
-                    </div>
-                  </Reveal>
-
-                  <Reveal delay={0.1}>
-                    <div className="grid sm:grid-cols-2 gap-6 max-w-3xl">
-                      <div>
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Nome completo *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                          placeholder="Seu nome"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          E-mail *
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                          placeholder="seu@email.com"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          WhatsApp *
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                          placeholder="(00) 00000-0000"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Quanto pretende investir? *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.investment}
-                          onChange={(e) => setFormData({ ...formData, investment: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors"
-                          placeholder="Ex: R$ 1.000"
-                        />
-                        <p className="mt-2 text-xs text-[#6b6b80]">
-                          Projetos a partir de R$ 1.000. Me diz sua faixa que eu monto a melhor
-                          solução pra ela.
-                        </p>
-                      </div>
-
-                      <div className="sm:col-span-2">
-                        <label className="block text-sm font-medium text-[#9999ab] mb-2">
-                          Conte sobre seu projeto{" "}
-                          <span className="text-[#6b6b80] font-normal">(opcional)</span>
-                        </label>
-                        <textarea
-                          rows={4}
-                          value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-[#1e1e2e] bg-[#0f0f18] text-white placeholder-[#6b6b80] focus:outline-none focus:border-[#00f0ff]/50 transition-colors resize-none"
-                          placeholder="Ideia, funcionalidades, referências de sites que você curte, público-alvo..."
-                        />
-                      </div>
-                    </div>
-                  </Reveal>
-
-                  {/* Submit */}
-                  <Reveal delay={0.2}>
-                    <div className="mt-10">
-                      <motion.button
-                        type="submit"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="inline-flex items-center gap-3 px-10 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.4)] transition-all duration-300"
-                      >
-                        <Send className="w-5 h-5" />
-                        Receber meu orçamento no WhatsApp
-                        <ChevronRight className="w-4 h-4" />
-                      </motion.button>
-
-                      <p className="text-sm text-[#6b6b80] mt-4 flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="text-[#00ff41]">✓</span> Resposta em até 24h
-                        <span className="text-[#1e1e2e]">•</span>
-                        <span className="text-[#00ff41]">✓</span> Sem compromisso
-                        <span className="text-[#1e1e2e]">•</span>
-                        <span className="text-[#00ff41]">✓</span> Você fala direto comigo
-                      </p>
-                    </div>
-                  </Reveal>
-                </div>
-              </motion.form>
-            ) : (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="max-w-lg mx-auto text-center py-20"
-              >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.2 }}
-                  className="flex h-20 w-20 items-center justify-center rounded-full bg-[#00ff41]/10 border border-[#00ff41]/20 mx-auto mb-8"
-                >
-                  <BadgeCheck className="w-10 h-10 text-[#00ff41]" />
-                </motion.div>
-
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  Quase lá! 🚀
-                </h2>
-                <p className="text-[#6b6b80] mb-8">
-                  Abri o WhatsApp com seu pedido pronto — é só apertar enviar.
-                  Se não abriu automaticamente, toque no botão abaixo.
-                </p>
-
+          {submitted ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto max-w-lg py-16 text-center"
+            >
+              <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[#f0a875]/25 bg-[#f0a875]/10">
+                <BadgeCheck className="h-10 w-10 text-[#f0a875]" />
+              </div>
+              <h2 className="font-display text-3xl text-[#f4ede2]">Pedido enviado!</h2>
+              <p className="mx-auto mt-4 max-w-md text-[#9c9286]">
+                Abri o WhatsApp com seu resumo — é só apertar enviar. Caso não tenha
+                aberto, me chame direto pelo botão abaixo. Respondo em até 24 horas.
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.4)] transition-all mb-6"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#f0a875] px-7 py-3 text-sm font-semibold text-[#1a130d] transition-colors hover:bg-[#f5b98e]"
                 >
-                  <Zap className="w-5 h-5" />
-                  Abrir o WhatsApp
+                  <MessageCircle className="h-4 w-4" />
+                  Abrir WhatsApp
                 </a>
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#f3ece1]/15 px-7 py-3 text-sm font-medium text-[#cabfae] transition-colors hover:border-[#f0a875]/40 hover:text-[#f0a875]"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar ao portfólio
+                </Link>
+              </div>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-16">
+              {/* Passo 1 — Tipo de projeto */}
+              <div>
+                <Reveal>
+                  <div className="mb-8 flex items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#f0a875]/30 font-mono text-sm text-[#f0a875]">
+                      1
+                    </span>
+                    <h2 className="font-display text-2xl text-[#f4ede2]">Tipo de projeto</h2>
+                  </div>
+                </Reveal>
 
-                <div>
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-[#00f0ff] border border-[#00f0ff]/30 hover:bg-[#00f0ff]/10 transition-colors"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Voltar ao Portfólio
-                  </Link>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {projectTypes.map((type, i) => {
+                    const active = selectedType === type.id;
+                    return (
+                      <Reveal key={type.id} delay={i * 0.05}>
+                        <motion.button
+                          type="button"
+                          whileHover={{ y: -4 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setSelectedType(active ? null : type.id)}
+                          className={`relative h-full w-full rounded-2xl border p-6 text-left transition-colors duration-300 ${
+                            active
+                              ? "border-[#f0a875]/50 bg-[#f0a875]/[0.06]"
+                              : "border-[#f3ece1]/[0.08] bg-[#13110d] hover:border-[#f3ece1]/20"
+                          }`}
+                        >
+                          {active && (
+                            <span className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-[#f0a875] text-[#1a130d]">
+                              <Check className="h-4 w-4" />
+                            </span>
+                          )}
+
+                          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-[#f0a875]/20 bg-[#f0a875]/10 text-[#f0a875]">
+                            <type.icon className="h-6 w-6" />
+                          </div>
+
+                          <h3 className="font-display text-lg text-[#f4ede2]">{type.title}</h3>
+                          <p className="mt-1 text-sm text-[#9c9286]">{type.desc}</p>
+
+                          <div className="mt-4 flex items-center gap-1.5 text-xs text-[#8a8275]">
+                            <Clock className="h-3 w-3" />
+                            {type.timeline}
+                          </div>
+
+                          {active && (
+                            <ul className="mt-4 space-y-2 border-t border-[#f3ece1]/[0.08] pt-4">
+                              {type.features.map((f) => (
+                                <li key={f} className="flex items-center gap-2 text-sm text-[#b6ac9c]">
+                                  <Check className="h-3 w-3 flex-none text-[#f0a875]" />
+                                  {f}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </motion.button>
+                      </Reveal>
+                    );
+                  })}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+
+              {/* Passo 2 — Seus dados */}
+              <div>
+                <Reveal>
+                  <div className="mb-8 flex items-center gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[#f0a875]/30 font-mono text-sm text-[#f0a875]">
+                      2
+                    </span>
+                    <h2 className="font-display text-2xl text-[#f4ede2]">Suas informações</h2>
+                  </div>
+                </Reveal>
+
+                <Reveal delay={0.1}>
+                  <div className="grid max-w-4xl gap-6 sm:grid-cols-2">
+                    <Field label="Nome completo *">
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className={inputCls}
+                        placeholder="Seu nome"
+                      />
+                    </Field>
+
+                    <Field label="E-mail *">
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className={inputCls}
+                        placeholder="seu@email.com"
+                      />
+                    </Field>
+
+                    <Field label="WhatsApp *">
+                      <input
+                        type="tel"
+                        required
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className={inputCls}
+                        placeholder="(00) 00000-0000"
+                      />
+                    </Field>
+
+                    <Field label="Investimento pretendido">
+                      <select
+                        value={formData.investment}
+                        onChange={(e) => setFormData({ ...formData, investment: e.target.value })}
+                        className={inputCls}
+                      >
+                        <option value="">Prefiro conversar</option>
+                        <option value="ate-2k">Até R$ 2.000</option>
+                        <option value="2k-5k">R$ 2.000 – R$ 5.000</option>
+                        <option value="5k-10k">R$ 5.000 – R$ 10.000</option>
+                        <option value="10k-mais">Acima de R$ 10.000</option>
+                      </select>
+                    </Field>
+
+                    <div className="sm:col-span-2">
+                      <Field label="Sobre o projeto">
+                        <textarea
+                          rows={5}
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          className={`${inputCls} resize-none`}
+                          placeholder="Conte sua ideia, funcionalidades desejadas, referências que você gosta, público-alvo..."
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </Reveal>
+
+                {/* Enviar */}
+                <Reveal delay={0.15}>
+                  <div className="mt-10">
+                    <motion.button
+                      type="submit"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="inline-flex items-center gap-3 rounded-full bg-[#f0a875] px-9 py-4 font-semibold text-[#1a130d] shadow-[0_10px_40px_-12px_rgba(240,168,117,0.5)] transition-colors hover:bg-[#f5b98e]"
+                    >
+                      <Send className="h-5 w-5" />
+                      Enviar pelo WhatsApp
+                      <ChevronRight className="h-4 w-4" />
+                    </motion.button>
+                    <p className="mt-3 text-xs text-[#8a8275]">
+                      Seu pedido vai montado direto na conversa. Você só confere e envia.
+                    </p>
+                  </div>
+                </Reveal>
+              </div>
+            </form>
+          )}
         </div>
       </section>
 
-      {/* Tech Showcase */}
-      <section className="relative z-10 py-20 border-t border-[#1e1e2e]">
-        <div className="mx-auto max-w-6xl px-6">
+      {/* ─── Tecnologias ─────────────────────────────────────────────────── */}
+      <section className="relative z-10 border-t border-[#f3ece1]/[0.07] py-20">
+        <div className="mx-auto max-w-5xl px-6">
           <Reveal>
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-white mb-4">
+            <div className="mb-14 text-center">
+              <Eyebrow>Stack</Eyebrow>
+              <h2 className="mt-4 font-display text-3xl text-[#f4ede2]">
                 Tecnologias que uso no seu projeto
               </h2>
-              <p className="text-[#6b6b80] max-w-2xl mx-auto">
-                Stack moderna e comprovada para garantir performance,
-                segurança e escalabilidade
+              <p className="mx-auto mt-3 max-w-xl text-[#9c9286]">
+                Ferramentas modernas e comprovadas para garantir performance, segurança e
+                escalabilidade.
               </p>
             </div>
           </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {techShowcase.map((tech, i) => (
-              <Reveal key={tech.name} delay={i * 0.1}>
-                <div className="glass-card rounded-2xl p-6 h-full">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl text-xl font-bold mb-4"
-                    style={{
-                      background: `${tech.color}15`,
-                      border: `1px solid ${tech.color}25`,
-                      color: tech.color,
-                    }}
-                  >
-                    {tech.icon}
+              <Reveal key={tech.name} delay={i * 0.08}>
+                <div className="h-full rounded-2xl border border-[#f3ece1]/[0.08] bg-[#13110d] p-6 transition-colors hover:border-[#f0a875]/25">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-[#f0a875]/20 bg-[#f0a875]/10 text-lg text-[#f0a875]">
+                    {tech.glyph}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">{tech.name}</h3>
-                  <p className="text-sm text-[#6b6b80] leading-relaxed">{tech.desc}</p>
+                  <h3 className="font-display text-lg text-[#f4ede2]">{tech.name}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#9c9286]">{tech.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -564,43 +484,50 @@ export default function OrcamentoPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative z-10 py-20 border-t border-[#1e1e2e]">
-        <div className="mx-auto max-w-4xl px-6 text-center">
+      {/* ─── CTA final ───────────────────────────────────────────────────── */}
+      <section className="relative z-10 border-t border-[#f3ece1]/[0.07] py-20">
+        <div className="mx-auto max-w-2xl px-6 text-center">
           <Reveal>
-            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#00ff41]/10 border border-[#00ff41]/20 mb-6">
-              <Star className="w-3 h-3 text-[#00ff41]" />
-              <span className="text-xs font-mono text-[#00ff41]">100% de clientes satisfeitos</span>
-            </div>
+            <Eyebrow>Prefere conversar?</Eyebrow>
           </Reveal>
-
           <Reveal delay={0.1}>
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Prefere conversar diretamente?
+            <h2 className="mt-4 font-display text-3xl text-[#f4ede2]">
+              Me chame diretamente no WhatsApp
             </h2>
           </Reveal>
-
           <Reveal delay={0.2}>
-            <p className="text-[#6b6b80] mb-8">
-              Sem problema! Me chama no WhatsApp que responderei rapidamente.
+            <p className="mx-auto mt-3 max-w-md text-[#9c9286]">
+              Sem formulário, sem espera. Respondo pessoalmente e a gente alinha tudo por lá.
             </p>
           </Reveal>
-
           <Reveal delay={0.3}>
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                "Olá Emmanuel! Vi seu portfólio e quero conversar sobre um projeto."
+                "Olá Emmanuel! Vi seu portfólio e gostaria de um orçamento."
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-black bg-[#00ff41] hover:shadow-[0_0_40px_rgba(0,255,65,0.4)] transition-all"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#f0a875] px-8 py-4 font-semibold text-[#1a130d] transition-colors hover:bg-[#f5b98e]"
             >
-              <Zap className="w-5 h-5" />
+              <MessageCircle className="h-5 w-5" />
               Chamar no WhatsApp
             </a>
           </Reveal>
         </div>
       </section>
-    </main>
+    </div>
+  );
+}
+
+// ─── Helpers de formulário ──────────────────────────────────────────────────
+const inputCls =
+  "w-full rounded-xl border border-[#f3ece1]/[0.1] bg-[#13110d] px-4 py-3 text-[#f4ede2] placeholder-[#6f6657] transition-colors focus:border-[#f0a875]/60 focus:outline-none";
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-2 block text-sm font-medium text-[#b6ac9c]">{label}</span>
+      {children}
+    </label>
   );
 }
