@@ -1,6 +1,6 @@
-// ══════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // 🛡️ Layout Admin — Sidebar administrativa com controle de acesso
-// ══════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 
 "use client";
 
@@ -15,6 +15,7 @@ import {
   Settings,
   Users,
   BarChart3,
+  MessageSquare,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -23,10 +24,10 @@ import {
   Shield,
   Bell,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const adminNav = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "CRM (WhatsApp)", href: "/admin/crm", icon: MessageSquare },
   { label: "Financeiro", href: "/admin/financeiro", icon: DollarSign },
   { label: "Agenda", href: "/admin/agenda", icon: CalendarDays },
   { label: "Clientes", href: "/admin/clientes", icon: Users },
@@ -45,13 +46,12 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-dark-950">
-      {/* ═══ SIDEBAR DESKTOP ═══════════════════════════════════════════ */}
+      {/* ═══ SIDEBAR DESKTOP ═══════════════════════════════════════════════ */}
       <aside
         className={`hidden lg:flex flex-col border-r border-dark-800 bg-dark-900 transition-all duration-300 ${
           collapsed ? "w-[72px]" : "w-64"
         }`}
       >
-        {/* Logo */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-dark-800">
           {!collapsed && (
             <Link href="/admin" className="flex items-center gap-2">
@@ -78,7 +78,6 @@ export default function AdminLayout({
           </button>
         </div>
 
-        {/* Navegação */}
         <nav className="flex-1 px-3 py-4 space-y-1">
           {adminNav.map((item) => {
             const isActive =
@@ -102,7 +101,6 @@ export default function AdminLayout({
           })}
         </nav>
 
-        {/* Footer */}
         <div className="p-3 border-t border-dark-800">
           <Link
             href="/"
@@ -116,7 +114,7 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* ═══ MOBILE DRAWER ═════════════════════════════════════════════ */}
+      {/* ═══ MOBILE DRAWER ═════════════════════════════════════════════════ */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -175,9 +173,8 @@ export default function AdminLayout({
         )}
       </AnimatePresence>
 
-      {/* ═══ CONTEÚDO PRINCIPAL ═════════════════════════════════════════ */}
+      {/* ═══ CONTEÚDO PRINCIPAL ════════════════════════════════════════════ */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top bar */}
         <header className="flex items-center justify-between h-16 px-4 lg:px-8 border-b border-dark-800 bg-dark-900/50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <button

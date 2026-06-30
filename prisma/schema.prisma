@@ -1,7 +1,6 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// 🏗️ SCHEMA PRISMA — CLÍNICA DE ESTÉTICA PREMIUM
-// 13 Modelos de Dados com Relacionamentos Completos
-// ══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏗️ SCHEMA PRISMA — CLÍNICA + CRM + AGENTES IA
+// ═══════════════════════════════════════════════════════════════════════════
 
 generator client {
   provider = "prisma-client-js"
@@ -12,7 +11,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── 1. USUÁRIO (Auth + Perfil) ──────────────────────────────────────────────
+// ─── 1. USUÁRIO ----------------------------------------------------------------
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -27,14 +26,13 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relacionamentos
-  accounts      Account[]
-  sessions      Session[]
-  agendamentos  Agendamento[]
-  anamneses     Anamnese[]
-  evolucoes     Evolucao[]
-  pagamentos    Pagamento[]
-  notificacoes  Notificacao[]
+  accounts     Account[]
+  sessions     Session[]
+  agendamentos Agendamento[]
+  anamneses    Anamnese[]
+  evolucoes    Evolucao[]
+  pagamentos   Pagamento[]
+  notificacoes Notificacao[]
 
   @@map("users")
 }
@@ -46,7 +44,7 @@ enum Role {
   SUPER_ADMIN
 }
 
-// ─── 2. CONTA OAUTH (Google, Instagram) ──────────────────────────────────────
+// ─── 2. CONTA OAUTH -------------------------------------------------------------
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -67,7 +65,7 @@ model Account {
   @@map("accounts")
 }
 
-// ─── 3. SESSÃO DE AUTENTICAÇÃO ───────────────────────────────────────────────
+// ─── 3. SESSÃO ------------------------------------------------------------------
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -79,7 +77,7 @@ model Session {
   @@map("sessions")
 }
 
-// ─── 4. TOKEN DE VERIFICAÇÃO ─────────────────────────────────────────────────
+// ─── 4. TOKEN DE VERIFICAÇÃO ----------------------------------------------------
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -89,24 +87,23 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// ─── 5. SERVIÇO / PROCEDIMENTO ───────────────────────────────────────────────
+// ─── 5. SERVIÇO ------------------------------------------------------------------
 model Servico {
-  id              String   @id @default(cuid())
-  nome            String
-  descricao       String   @db.Text
-  descricaoCurta  String?
-  categoria       CategoriaServico
-  preco           Decimal  @db.Decimal(10, 2)
-  precoPromocional Decimal? @db.Decimal(10, 2)
-  duracaoMinutos  Int
-  imagemUrl       String?
-  ativo           Boolean  @default(true)
-  destaque        Boolean  @default(false)
-  ordemExibicao   Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String           @id @default(cuid())
+  nome             String
+  descricao        String           @db.Text
+  descricaoCurta   String?
+  categoria        CategoriaServico
+  preco            Decimal          @db.Decimal(10, 2)
+  precoPromocional Decimal?         @db.Decimal(10, 2)
+  duracaoMinutos   Int
+  imagemUrl        String?
+  ativo            Boolean          @default(true)
+  destaque         Boolean          @default(false)
+  ordemExibicao    Int              @default(0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
-  // Relacionamentos
   agendamentos Agendamento[]
 
   @@map("servicos")
@@ -121,25 +118,24 @@ enum CategoriaServico {
   PACOTE
 }
 
-// ─── 6. AGENDAMENTO ──────────────────────────────────────────────────────────
+// ─── 6. AGENDAMENTO -------------------------------------------------------------
 model Agendamento {
-  id              String            @id @default(cuid())
-  clienteId       String
-  servicoId       String
-  profissionalId  String?
-  dataHora        DateTime
-  dataFim         DateTime
-  status          StatusAgendamento @default(PENDENTE)
-  observacoes     String?           @db.Text
-  valorTotal      Decimal           @db.Decimal(10, 2)
+  id                String            @id @default(cuid())
+  clienteId         String
+  servicoId         String
+  profissionalId    String?
+  dataHora          DateTime
+  dataFim           DateTime
+  status            StatusAgendamento @default(PENDENTE)
+  observacoes       String?           @db.Text
+  valorTotal        Decimal           @db.Decimal(10, 2)
   origemAgendamento OrigemAgendamento @default(SITE)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
-  // Relacionamentos
-  cliente    User       @relation(fields: [clienteId], references: [id])
-  servico    Servico    @relation(fields: [servicoId], references: [id])
-  pagamento  Pagamento?
+  cliente   User       @relation(fields: [clienteId], references: [id])
+  servico   Servico    @relation(fields: [servicoId], references: [id])
+  pagamento Pagamento?
 
   @@index([clienteId])
   @@index([dataHora])
@@ -148,14 +144,14 @@ model Agendamento {
 }
 
 enum StatusAgendamento {
-  PENDENTE        // Aguardando confirmação
-  CONFIRMADO      // Pago ou confirmado manualmente
-  EM_ATENDIMENTO  // Em andamento
-  CONCLUIDO       // Finalizado com sucesso
-  CANCELADO       // Cancelado pelo cliente
-  NO_SHOW         // Paciente não compareceu
-  REAGENDADO      // Movido para outra data
-  LISTA_ESPERA    // Aguardando vaga
+  PENDENTE
+  CONFIRMADO
+  EM_ATENDIMENTO
+  CONCLUIDO
+  CANCELADO
+  NO_SHOW
+  REAGENDADO
+  LISTA_ESPERA
 }
 
 enum OrigemAgendamento {
@@ -166,28 +162,27 @@ enum OrigemAgendamento {
   TELEFONE
 }
 
-// ─── 7. PAGAMENTO ────────────────────────────────────────────────────────────
+// ─── 7. PAGAMENTO ---------------------------------------------------------------
 model Pagamento {
-  id                    String          @id @default(cuid())
-  agendamentoId         String          @unique
-  clienteId             String
-  valorOriginal         Decimal         @db.Decimal(10, 2)
-  valorPago             Decimal?        @db.Decimal(10, 2)
-  desconto              Decimal?        @db.Decimal(10, 2)
-  metodo                MetodoPagamento
-  status                StatusPagamento @default(PENDENTE)
-  mercadoPagoId         String?         @unique
-  mercadoPagoStatus     String?
-  mercadoPagoDetail     String?         @db.Text
-  pixQrCode             String?         @db.Text
-  pixQrCodeBase64       String?         @db.Text
-  pixExpiresAt          DateTime?
-  fraudeDetected        Boolean         @default(false)
-  fraudeMotivo          String?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  id                String          @id @default(cuid())
+  agendamentoId     String          @unique
+  clienteId         String
+  valorOriginal     Decimal         @db.Decimal(10, 2)
+  valorPago         Decimal?        @db.Decimal(10, 2)
+  desconto          Decimal?        @db.Decimal(10, 2)
+  metodo            MetodoPagamento
+  status            StatusPagamento @default(PENDENTE)
+  mercadoPagoId     String?         @unique
+  mercadoPagoStatus String?
+  mercadoPagoDetail String?         @db.Text
+  pixQrCode         String?         @db.Text
+  pixQrCodeBase64   String?         @db.Text
+  pixExpiresAt      DateTime?
+  fraudeDetected    Boolean         @default(false)
+  fraudeMotivo      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
-  // Relacionamentos
   agendamento Agendamento @relation(fields: [agendamentoId], references: [id])
   cliente     User        @relation(fields: [clienteId], references: [id])
 
@@ -215,68 +210,59 @@ enum StatusPagamento {
   FRAUDE_BLOQUEADO
 }
 
-// ─── 8. ANAMNESE (Ficha Médica Criptografada) ───────────────────────────────
+// ─── 8. ANAMNESE ----------------------------------------------------------------
 model Anamnese {
-  id                    String   @id @default(cuid())
-  clienteId             String
-  // Dados criptografados AES-256 (LGPD)
-  dadosCriptografados   String   @db.Text
-  // Flags médicas (booleanos para consulta rápida sem descriptografar)
-  alergia               Boolean  @default(false)
-  diabetes              Boolean  @default(false)
-  hipertensao           Boolean  @default(false)
-  cardiopatia           Boolean  @default(false)
-  gravidez              Boolean  @default(false)
-  lactante              Boolean  @default(false)
-  marcapasso            Boolean  @default(false)
-  epilepsia             Boolean  @default(false)
-  cancer                Boolean  @default(false)
-  cirurgiaRecente       Boolean  @default(false)
-  problemaPele          Boolean  @default(false)
-  usoMedicamento        Boolean  @default(false)
-  assinaturaDigital     String?
-  consentimentoLGPD     Boolean  @default(false)
-  dataAssinatura        DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  clienteId           String
+  dadosCriptografados String    @db.Text
+  alergia             Boolean   @default(false)
+  diabetes            Boolean   @default(false)
+  hipertensao         Boolean   @default(false)
+  cardiopatia         Boolean   @default(false)
+  gravidez            Boolean   @default(false)
+  lactante            Boolean   @default(false)
+  marcapasso          Boolean   @default(false)
+  epilepsia           Boolean   @default(false)
+  cancer              Boolean   @default(false)
+  cirurgiaRecente     Boolean   @default(false)
+  problemaPele        Boolean   @default(false)
+  usoMedicamento      Boolean   @default(false)
+  assinaturaDigital   String?
+  consentimentoLGPD   Boolean   @default(false)
+  dataAssinatura      DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  // Relacionamentos
   cliente User @relation(fields: [clienteId], references: [id])
 
   @@index([clienteId])
   @@map("anamneses")
 }
 
-// ─── 9. EVOLUÇÃO CLÍNICA ────────────────────────────────────────────────────
+// ─── 9. EVOLUÇÃO CLÍNICA -------------------------------------------------------
 model Evolucao {
-  id              String   @id @default(cuid())
-  clienteId       String
-  dataAvaliacao   DateTime @default(now())
-  observacoes     String?  @db.Text
-  
-  // 13 Zonas de Medição Corporal (em cm)
-  abdomen         Decimal? @db.Decimal(6, 2)
-  cintura         Decimal? @db.Decimal(6, 2)
-  quadril         Decimal? @db.Decimal(6, 2)
-  coxaDireita     Decimal? @db.Decimal(6, 2)
-  coxaEsquerda    Decimal? @db.Decimal(6, 2)
-  bracoDireito    Decimal? @db.Decimal(6, 2)
-  bracoEsquerdo   Decimal? @db.Decimal(6, 2)
-  torax           Decimal? @db.Decimal(6, 2)
-  panturrilhaDir  Decimal? @db.Decimal(6, 2)
-  panturrilhaEsq  Decimal? @db.Decimal(6, 2)
-  peso            Decimal? @db.Decimal(6, 2)
-  altura          Decimal? @db.Decimal(5, 2)
-  imc             Decimal? @db.Decimal(5, 2)
+  id             String   @id @default(cuid())
+  clienteId      String
+  dataAvaliacao  DateTime @default(now())
+  observacoes    String?  @db.Text
+  abdomen        Decimal? @db.Decimal(6, 2)
+  cintura        Decimal? @db.Decimal(6, 2)
+  quadril        Decimal? @db.Decimal(6, 2)
+  coxaDireita    Decimal? @db.Decimal(6, 2)
+  coxaEsquerda   Decimal? @db.Decimal(6, 2)
+  bracoDireito   Decimal? @db.Decimal(6, 2)
+  bracoEsquerdo  Decimal? @db.Decimal(6, 2)
+  torax          Decimal? @db.Decimal(6, 2)
+  panturrilhaDir Decimal? @db.Decimal(6, 2)
+  panturrilhaEsq Decimal? @db.Decimal(6, 2)
+  peso           Decimal? @db.Decimal(6, 2)
+  altura         Decimal? @db.Decimal(5, 2)
+  imc            Decimal? @db.Decimal(5, 2)
+  fotosAntes     String[] @default([])
+  fotosDepois    String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  // Fotos antes/depois (URLs criptografadas)
-  fotosAntes      String[] @default([])
-  fotosDepois     String[] @default([])
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relacionamentos
   cliente User @relation(fields: [clienteId], references: [id])
 
   @@index([clienteId])
@@ -284,60 +270,56 @@ model Evolucao {
   @@map("evolucoes")
 }
 
-// ─── 10. CONFIGURAÇÃO DO SISTEMA ─────────────────────────────────────────────
+// ─── 10. CONFIGURAÇÃO DO SISTEMA -----------------------------------------------
 model ConfiguracaoSistema {
-  id                    String   @id @default(cuid())
-  nomeClinica           String   @default("Emmanuel Estética Premium")
-  logoUrl               String?
-  telefone              String?
-  email                 String?
-  endereco              String?
-  cnpj                  String?
-  // Horários de funcionamento
-  horarioAbertura       String   @default("08:00")
-  horarioFechamento     String   @default("20:00")
-  intervaloMinutos      Int      @default(30)
-  diasFuncionamento     Int[]    @default([1, 2, 3, 4, 5, 6]) // 0=Dom ... 6=Sab
-  // Estética do sistema
-  corPrimaria           String   @default("#e14a72")
-  corSecundaria         String   @default("#d99c22")
-  // Redes sociais
-  instagramUrl          String?
-  facebookUrl           String?
-  whatsappNumero        String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                String   @id @default(cuid())
+  nomeClinica       String   @default("Emmanuel Estética Premium")
+  logoUrl           String?
+  telefone          String?
+  email             String?
+  endereco          String?
+  cnpj              String?
+  horarioAbertura   String   @default("08:00")
+  horarioFechamento String   @default("20:00")
+  intervaloMinutos  Int      @default(30)
+  diasFuncionamento Int[]    @default([1, 2, 3, 4, 5, 6])
+  corPrimaria       String   @default("#e14a72")
+  corSecundaria     String   @default("#d99c22")
+  instagramUrl      String?
+  facebookUrl       String?
+  whatsappNumero    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@map("configuracoes_sistema")
 }
 
-// ─── 11. BLOQUEIO DE AGENDA ──────────────────────────────────────────────────
+// ─── 11. BLOQUEIO DE AGENDA -----------------------------------------------------
 model BloqueioAgenda {
-  id              String   @id @default(cuid())
-  titulo          String
-  dataInicio      DateTime
-  dataFim         DateTime
-  motivo          String?
-  diaTodo         Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  id         String   @id @default(cuid())
+  titulo     String
+  dataInicio DateTime
+  dataFim    DateTime
+  motivo     String?
+  diaTodo    Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   @@index([dataInicio, dataFim])
   @@map("bloqueios_agenda")
 }
 
-// ─── 12. NOTIFICAÇÃO ─────────────────────────────────────────────────────────
+// ─── 12. NOTIFICAÇÃO ------------------------------------------------------------
 model Notificacao {
-  id          String          @id @default(cuid())
-  userId      String
-  titulo      String
-  mensagem    String          @db.Text
-  tipo        TipoNotificacao
-  canal       CanalNotificacao
-  lida        Boolean         @default(false)
-  enviadaEm   DateTime        @default(now())
-  metadata    Json?
+  id        String           @id @default(cuid())
+  userId    String
+  titulo    String
+  mensagem  String           @db.Text
+  tipo      TipoNotificacao
+  canal     CanalNotificacao
+  lida      Boolean          @default(false)
+  enviadaEm DateTime         @default(now())
+  metadata  Json?
 
-  // Relacionamentos
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId, lida])
@@ -364,7 +346,7 @@ enum CanalNotificacao {
   IN_APP
 }
 
-// ─── 13. LOG DE AUDITORIA (Segurança) ───────────────────────────────────────
+// ─── 13. AUDIT LOG --------------------------------------------------------------
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
@@ -381,4 +363,204 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🤖 CRM + AGENTES IA (Evolution API)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── 14. LEAD (CRM) -------------------------------------------------------------
+model Lead {
+  id       String       @id @default(cuid())
+  telefone String?      @unique
+  nome     String?
+  email    String?
+  origem   OrigemLead   @default(WHATSAPP)
+  estagio  EstagioLead  @default(NOVO)
+  pipeline String       @default("vendas")
+
+  // BANT (memória do funil)
+  bantBudget    String?
+  bantAuthority String?
+  bantNeed      String?
+  bantTimeline  String?
+
+  objecoesLevantadas   String[] @default([])
+  produtosApresentados String[] @default([])
+  ultimoMotivoPerda    String?
+  proximoFollowup      DateTime?
+
+  // Compliance
+  consentimentoLGPD Boolean @default(false)
+  optOut            Boolean @default(false)
+
+  // Segurança
+  flagsSeguranca String[] @default([])
+  bloqueado      Boolean  @default(false)
+  motivoBloqueio String?
+
+  tags  String[] @default([])
+  notes String?  @db.Text
+
+  primeiroContato DateTime @default(now())
+  ultimoContato   DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  conversations Conversation[]
+
+  @@index([estagio])
+  @@index([origem])
+  @@index([proximoFollowup])
+  @@map("leads")
+}
+
+enum OrigemLead {
+  WHATSAPP
+  SITE
+  ADS_META
+  ADS_GOOGLE
+  INDICACAO
+  ORGANICO
+  IMPORTADO
+  DESCONHECIDO
+}
+
+enum EstagioLead {
+  NOVO
+  SAUDACAO
+  DESCOBERTA
+  QUALIFICACAO
+  APRESENTACAO
+  FECHAMENTO
+  VENDIDO
+  PERDIDO
+  DESQUALIFICADO
+  ESCALADO
+}
+
+// ─── 15. CONVERSA ---------------------------------------------------------------
+model Conversation {
+  id               String         @id @default(cuid())
+  leadId           String
+  canal            CanalConversa  @default(WHATSAPP)
+  agenteAtivo      String?
+  status           StatusConversa @default(ABERTA)
+  resumo           String?        @db.Text
+  ultimaMensagemEm DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  lead      Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  agentRuns AgentRun[]
+
+  @@index([leadId])
+  @@index([status])
+  @@map("conversations")
+}
+
+enum CanalConversa {
+  WHATSAPP
+  SITE_CHAT
+  EMAIL
+  TELEFONE
+}
+
+enum StatusConversa {
+  ABERTA
+  PAUSADA
+  ESCALADA_HUMANO
+  ENCERRADA
+}
+
+// ─── 16. MENSAGEM ---------------------------------------------------------------
+model Message {
+  id                 String          @id @default(cuid())
+  conversationId     String
+  direcao            DirecaoMensagem
+  conteudo           String          @db.Text
+  conteudoTipo       TipoConteudo    @default(TEXTO)
+  metadata           Json?
+  evolutionMessageId String?         @unique
+  flagsSeguranca     String[]        @default([])
+  agentRunId         String?
+  enviadaEm          DateTime        @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  agentRun     AgentRun?    @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, enviadaEm])
+  @@map("messages")
+}
+
+enum DirecaoMensagem {
+  INBOUND
+  OUTBOUND
+  INTERNA
+}
+
+enum TipoConteudo {
+  TEXTO
+  AUDIO
+  IMAGEM
+  VIDEO
+  DOCUMENTO
+  STICKER
+  LOCALIZACAO
+  CONTATO
+}
+
+// ─── 17. AGENT RUN --------------------------------------------------------------
+model AgentRun {
+  id             String         @id @default(cuid())
+  conversationId String?
+  agente         String
+  versaoPrompt   String
+  modelo         String
+  input          Json
+  output         String?        @db.Text
+  toolCalls      Json?
+  inputTokens    Int?
+  outputTokens   Int?
+  custoUsd       Decimal?       @db.Decimal(10, 6)
+  latenciaMs     Int?
+  status         StatusAgentRun @default(EM_EXECUCAO)
+  errorMessage   String?        @db.Text
+  injectionDetectada Boolean    @default(false)
+  injectionPadrao    String?
+  createdAt      DateTime       @default(now())
+  finishedAt     DateTime?
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  messages     Message[]
+
+  @@index([conversationId])
+  @@index([agente])
+  @@index([status])
+  @@index([createdAt])
+  @@map("agent_runs")
+}
+
+enum StatusAgentRun {
+  EM_EXECUCAO
+  CONCLUIDO
+  ERRO
+  TIMEOUT
+  BLOQUEADO_KILL_SWITCH
+  BLOQUEADO_INJECTION
+}
+
+// ─── 18. KILL SWITCH ------------------------------------------------------------
+model KillSwitch {
+  id         String    @id @default(cuid())
+  agente     String    @unique
+  ativo      Boolean   @default(false)
+  motivo     String?
+  ativadoPor String?
+  ativadoEm  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("kill_switches")
 }

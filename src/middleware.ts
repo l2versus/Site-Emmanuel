@@ -1,15 +1,23 @@
-// ══════════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // 🛡️ MIDDLEWARE DE SEGURANÇA — Portfolio EB
-// Headers de Segurança + Rate Limiting básico
-// ══════════════════════════════════════════════════════════════════════════════
+// Headers de Segurança + Rate Limiting (com isenções para webhooks IA)
+// ════════════════════════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// ─── Rate Limiting em memória (per-IP) ────────────────────────────────────────
+// ─── Rate Limiting em memória (per-IP) ────────────────────────────────────
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 100;
+
+// Rotas isentas de rate-limit (webhooks de serviços externos / monitoramento).
+// HMAC e auth dedicada controlam essas rotas; rate-limit por IP atrapalha
+// (Evolution pode disparar vários eventos ao mesmo tempo em pico).
+const RATE_LIMIT_EXEMPT_PREFIXES = [
+  "/api/whatsapp/webhook",
+  "/api/agents/health",
+];
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -31,8 +39,9 @@ export default function middleware(request: NextRequest) {
     request.headers.get("x-real-ip") ||
     "unknown";
 
-  // ─── 1. Rate Limiting ────────────────────────────────────────────────
-  if (isRateLimited(ip)) {
+  // ─── 1. Rate Limiting (com isenções) ─────────────────────────────────────
+  const isExempt = RATE_LIMIT_EXEMPT_PREFIXES.some((p) => pathname.startsWith(p));
+  if (!isExempt && isRateLimited(ip)) {
     return new NextResponse("Too Many Requests", {
       status: 429,
       headers: {
@@ -42,7 +51,7 @@ export default function middleware(request: NextRequest) {
     });
   }
 
-  // ─── 2. Response com Headers de Segurança ────────────────────────────
+  // ─── 2. Response com Headers de Segurança ───────────────────────────────────
   const response = NextResponse.next();
 
   response.headers.set("X-Frame-Options", "DENY");
@@ -53,7 +62,6 @@ export default function middleware(request: NextRequest) {
     "camera=(), microphone=(), geolocation=(), payment=(self)"
   );
 
-  // Cache Control para rotas da API
   if (pathname.startsWith("/api/")) {
     response.headers.set(
       "Cache-Control",
