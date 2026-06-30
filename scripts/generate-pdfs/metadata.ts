@@ -1,10 +1,17 @@
 // ════════════════════════════════════════════════════════════════════════════
 // 📄 Metadata por agente — conteúdo específico de cada PDF
+// Paleta: metais nobres (prata, dourado, cobre, bronze…) sobre preto
+// alinhada com a marca CB — Emmanuel Bezerra (EB Develop)
 // ════════════════════════════════════════════════════════════════════════════
 
 export type CoverAccent =
-  | "rose" | "amber" | "emerald" | "cyan"
-  | "indigo" | "purple" | "blue";
+  | "silver"   // prata fria — liderança / orquestrador
+  | "gold"     // dourado — vendas, dinheiro
+  | "copper"   // cobre quente — WhatsApp
+  | "platinum" // platina clara — frontend
+  | "titanium" // titanio azulado — backend
+  | "bronze"   // bronze — prompt engineer (alquimia)
+  | "steel";   // aço — automação (industrial)
 
 export type AgentPdfMeta = {
   pdfTagline: string;
@@ -41,7 +48,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Diagnóstico de reversibilidade (one-way door), checklist técnico e alternativa mais barata pra testar.",
       },
     ],
-    coverAccent: "purple",
+    coverAccent: "silver",
   },
 
   "consultor-vendas-eb": {
@@ -70,7 +77,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Script de progressão por escolha, sinal de escassez real e gatilho de timing.",
       },
     ],
-    coverAccent: "rose",
+    coverAccent: "gold",
   },
 
   "agente-vendas-wpp": {
@@ -99,7 +106,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Recusa firme, sem explicar a regra violada, com convite educado pra falar de negócio.",
       },
     ],
-    coverAccent: "emerald",
+    coverAccent: "copper",
   },
 
   "agente-frontend-senior": {
@@ -128,7 +135,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Plano de migração incremental por rota, riscos por fase e ponto de atenção em RSC/data fetching.",
       },
     ],
-    coverAccent: "cyan",
+    coverAccent: "platinum",
   },
 
   "agente-backend-senior": {
@@ -157,7 +164,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Análise dos riscos (saga, lock, dead-letter) e recomendação com código de exemplo.",
       },
     ],
-    coverAccent: "indigo",
+    coverAccent: "titanium",
   },
 
   "agente-prompt-engineer": {
@@ -186,7 +193,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Plano de redução com prompt caching, compactar few-shot, baixar para modelo menor e routing seletivo.",
       },
     ],
-    coverAccent: "amber",
+    coverAccent: "bronze",
   },
 
   "agente-ia-automacao": {
@@ -215,7 +222,7 @@ export const agentMeta: Record<string, AgentPdfMeta> = {
         vocePega: "Estado da arte de tool use, schema de tool, kill switch, eval de segurança obrigatório antes de subir.",
       },
     ],
-    coverAccent: "blue",
+    coverAccent: "steel",
   },
 };
 
@@ -228,3 +235,14 @@ export const ORDER = [
   "agente-prompt-engineer",
   "agente-ia-automacao",
 ] as const;
+
+// Identidade global EB Develop / Emmanuel Bezerra
+export const BRAND = {
+  name: "EB DEVELOP",
+  founder: "Emmanuel Bezerra",
+  city: "Fortaleza, CE",
+  contact: "contactl2versus@gmail.com",
+  taglineLine1: "CÓDIGO É LÓGICA.",
+  taglineLine2: "IMPACTO É PROPÓSITO.",
+  serieTitle: "TIME IA · CB COLLECTION",
+} as const;

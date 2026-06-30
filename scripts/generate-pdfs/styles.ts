@@ -1,36 +1,50 @@
 // ════════════════════════════════════════════════════════════════════════════
-// 🎨 Estilos CSS — paleta EB Develop (coral + dark) com variação por agente
+// 🎨 Estilos CSS — paleta metais nobres (prata + dourado) sobre preto
+// Alinhada com a marca "CB" / EB Develop — Emmanuel Bezerra
 // ════════════════════════════════════════════════════════════════════════════
 
 import type { CoverAccent } from "./metadata";
 
-const accentColors: Record<CoverAccent, { from: string; to: string; solid: string }> = {
-  rose:    { from: "#e14a72", to: "#8d1f3f", solid: "#e14a72" }, // EB principal
-  amber:   { from: "#f59e0b", to: "#92400e", solid: "#f59e0b" },
-  emerald: { from: "#10b981", to: "#064e3b", solid: "#10b981" },
-  cyan:    { from: "#06b6d4", to: "#0e7490", solid: "#06b6d4" },
-  indigo:  { from: "#6366f1", to: "#3730a3", solid: "#6366f1" },
-  purple:  { from: "#a855f7", to: "#581c87", solid: "#a855f7" },
-  blue:    { from: "#3b82f6", to: "#1e3a8a", solid: "#3b82f6" },
+type AccentPalette = {
+  light: string;     // luz alta do metal
+  base: string;      // tom principal
+  deep: string;      // sombra profunda
+  glow: string;      // brilho de borda
+};
+
+const accentColors: Record<CoverAccent, AccentPalette> = {
+  silver:   { light: "#e8eaf0", base: "#a8afbb", deep: "#4a5260", glow: "#c8cdd6" },
+  gold:     { light: "#f5d99c", base: "#c89968", deep: "#7a5a32", glow: "#e8c084" },
+  copper:   { light: "#e8a274", base: "#b8714a", deep: "#6a3a22", glow: "#d18556" },
+  platinum: { light: "#f3f4f7", base: "#c1c7d0", deep: "#6a7280", glow: "#dadee4" },
+  titanium: { light: "#d0d8e3", base: "#7a8a9e", deep: "#3a4656", glow: "#a3b1c2" },
+  bronze:   { light: "#e3b878", base: "#a06f3a", deep: "#5a3a18", glow: "#c8924a" },
+  steel:    { light: "#dde3eb", base: "#8b96a5", deep: "#3e4854", glow: "#b0bac8" },
 };
 
 export function renderStyles(accent: CoverAccent): string {
   const c = accentColors[accent];
+
   return `
     @page { size: A4; margin: 0; }
 
     :root {
-      --eb-brand: #e14a72;
-      --eb-brand-dark: #b13558;
-      --eb-gold: #d99c22;
-      --eb-dark-950: #0a0a0d;
-      --eb-dark-900: #14141a;
-      --eb-dark-800: #1f1f29;
-      --eb-dark-700: #2a2a37;
-      --eb-dark-400: #6b6b7d;
-      --accent: ${c.solid};
-      --accent-from: ${c.from};
-      --accent-to: ${c.to};
+      --silver-light: #e8eaf0;
+      --silver-base:  #a8afbb;
+      --silver-deep:  #4a5260;
+      --gold-light:   #f5d99c;
+      --gold-base:    #c89968;
+      --gold-deep:    #7a5a32;
+      --ink-950:      #050507;
+      --ink-900:      #0d0d12;
+      --ink-800:      #15151c;
+      --ink-700:      #21212b;
+      --ink-400:      #6a6a78;
+      --paper:        #fafafc;
+      --accent-light: ${c.light};
+      --accent-base:  ${c.base};
+      --accent-deep:  ${c.deep};
+      --accent-glow:  ${c.glow};
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,8 +52,8 @@ export function renderStyles(accent: CoverAccent): string {
     html, body {
       font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       font-size: 11pt;
-      color: #1a1a22;
-      background: #fff;
+      color: #18181f;
+      background: var(--paper);
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
@@ -48,9 +62,9 @@ export function renderStyles(accent: CoverAccent): string {
       width: 210mm;
       min-height: 297mm;
       page-break-after: always;
-      padding: 18mm 16mm;
+      padding: 20mm 18mm 18mm;
       position: relative;
-      background: #fff;
+      background: var(--paper);
     }
     .page:last-child { page-break-after: auto; }
 
@@ -58,60 +72,91 @@ export function renderStyles(accent: CoverAccent): string {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 4mm;
-      background: linear-gradient(90deg, var(--accent-from), var(--accent-to));
+      height: 3mm;
+      background: linear-gradient(90deg, var(--silver-base) 0%, var(--silver-light) 50%, var(--gold-base) 50.1%, var(--gold-light) 100%);
     }
 
     .page-footer {
       position: absolute;
-      bottom: 8mm;
-      left: 16mm; right: 16mm;
+      bottom: 10mm;
+      left: 18mm; right: 18mm;
       display: flex;
       justify-content: space-between;
-      font-size: 8.5pt;
-      color: var(--eb-dark-400);
-      letter-spacing: 0.05em;
+      font-size: 8pt;
+      color: var(--ink-400);
+      letter-spacing: 0.18em;
       text-transform: uppercase;
+      padding-top: 4mm;
+      border-top: 0.3mm solid #d8d8e0;
+    }
+    .page-footer .brackets {
+      color: var(--accent-base);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0;
     }
 
     /* ─── COVER ─────────────────────────────────────────────────────────────────────── */
     .cover {
-      padding: 24mm 18mm;
+      padding: 24mm 22mm;
       background:
-        radial-gradient(circle at 80% 10%, ${c.from}33 0%, transparent 50%),
-        radial-gradient(circle at 20% 90%, ${c.to}66 0%, transparent 50%),
-        linear-gradient(135deg, #0a0a0d 0%, ${c.to} 100%);
+        radial-gradient(circle at 80% 15%, ${c.light}1a 0%, transparent 45%),
+        radial-gradient(circle at 15% 85%, ${c.deep}99 0%, transparent 55%),
+        linear-gradient(135deg, #050507 0%, #0d0d12 50%, ${c.deep} 100%);
       color: #fff;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       min-height: 297mm;
+      overflow: hidden;
     }
     .cover::before { display: none; }
 
-    .cover-brand {
-      font-size: 10pt;
+    .cover-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cb-logo {
+      width: 16mm;
+      height: 16mm;
+      display: block;
+    }
+
+    .cover-series {
+      font-size: 9pt;
       letter-spacing: 0.35em;
       font-weight: 700;
-      color: ${c.solid};
       text-transform: uppercase;
+      background: linear-gradient(90deg, var(--silver-light), var(--gold-light));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      text-align: right;
+    }
+
+    .cover-content {
+      max-width: 165mm;
     }
 
     .cover-eyebrow {
-      font-size: 11pt;
-      color: rgba(255,255,255,0.65);
-      letter-spacing: 0.08em;
+      font-size: 10pt;
+      color: ${c.light};
+      letter-spacing: 0.25em;
       text-transform: uppercase;
-      margin-bottom: 8mm;
+      margin-bottom: 10mm;
+      font-weight: 500;
+      opacity: 0.85;
     }
 
     .cover-title {
-      font-size: 42pt;
+      font-size: 44pt;
       font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      margin-bottom: 10mm;
-      background: linear-gradient(135deg, #fff 0%, ${c.from} 100%);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
+      margin-bottom: 12mm;
+      background: linear-gradient(135deg, var(--silver-light) 0%, #fff 35%, ${c.light} 65%, ${c.base} 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -119,25 +164,56 @@ export function renderStyles(accent: CoverAccent): string {
     }
 
     .cover-tagline {
-      font-size: 14pt;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.85);
+      font-size: 13.5pt;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.88);
       max-width: 150mm;
       font-weight: 400;
     }
 
-    .cover-footer {
+    .cover-bottom {
+      border-top: 0.3mm solid rgba(255,255,255,0.15);
+      padding-top: 8mm;
+    }
+
+    .cover-tagline-brand {
+      font-size: 11pt;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 6mm;
+    }
+    .cover-tagline-brand .silver-text {
+      background: linear-gradient(90deg, #fff, var(--silver-base));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .cover-tagline-brand .gold-text {
+      background: linear-gradient(90deg, var(--gold-light), var(--gold-base));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .cover-tagline-brand .brackets {
+      color: ${c.base};
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0;
+      margin: 0 4mm;
+    }
+
+    .cover-meta {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      border-top: 1px solid rgba(255,255,255,0.15);
-      padding-top: 6mm;
-      font-size: 9pt;
-      color: rgba(255,255,255,0.6);
-      letter-spacing: 0.05em;
+      font-size: 8.5pt;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.15em;
       text-transform: uppercase;
     }
-    .cover-footer strong { color: #fff; font-weight: 700; }
+    .cover-meta strong { color: rgba(255,255,255,0.95); font-weight: 700; }
 
     /* ─── TIPOGRAFIA INTERNA ──────────────────────────────────────────────────────────── */
     h1.page-title {
@@ -145,137 +221,145 @@ export function renderStyles(accent: CoverAccent): string {
       font-weight: 800;
       letter-spacing: -0.02em;
       line-height: 1.1;
-      margin: 6mm 0 3mm;
-      color: #0a0a0d;
+      margin: 6mm 0 4mm;
+      color: var(--ink-950);
     }
     .eyebrow {
-      font-size: 9pt;
+      font-size: 8.5pt;
       font-weight: 700;
-      letter-spacing: 0.25em;
-      color: var(--accent);
+      letter-spacing: 0.3em;
+      color: var(--accent-deep);
       text-transform: uppercase;
-      margin-bottom: 2mm;
+      margin-bottom: 2.5mm;
     }
     h2 {
       font-size: 16pt;
       font-weight: 700;
-      margin: 6mm 0 3mm;
-      color: #0a0a0d;
+      margin: 8mm 0 3mm;
+      color: var(--ink-950);
       letter-spacing: -0.01em;
     }
     h3 {
       font-size: 13pt;
       font-weight: 700;
       margin: 5mm 0 2mm;
-      color: #1a1a22;
+      color: var(--ink-900);
     }
-    p { line-height: 1.55; margin-bottom: 3mm; color: #2a2a37; }
-    .lead { font-size: 12pt; color: #1a1a22; line-height: 1.5; }
+    p { line-height: 1.6; margin-bottom: 3mm; color: #2a2a32; }
+    .lead { font-size: 12pt; color: #18181f; line-height: 1.55; }
 
     ul, ol { padding-left: 6mm; margin-bottom: 3mm; }
-    li { line-height: 1.55; margin-bottom: 1.5mm; color: #2a2a37; }
+    li { line-height: 1.6; margin-bottom: 1.8mm; color: #2a2a32; }
 
-    strong { color: #0a0a0d; font-weight: 700; }
+    strong { color: var(--ink-950); font-weight: 700; }
 
-    /* ─── CARDS / BLOCOS ────────────────────────────────────────────────────────────── */
+    /* ─── CARDS ─────────────────────────────────────────────────────────────────────────── */
     .card {
-      background: #f7f7fa;
-      border: 1px solid #e8e8ee;
-      border-radius: 4mm;
-      padding: 5mm 6mm;
-      margin-bottom: 4mm;
-    }
-    .card-accent {
-      background: linear-gradient(135deg, ${c.from}10, ${c.from}05);
-      border: 1px solid ${c.solid}40;
-      border-left: 1.5mm solid var(--accent);
-      border-radius: 3mm;
-      padding: 5mm 6mm;
-      margin-bottom: 4mm;
-    }
-    .card-dark {
-      background: var(--eb-dark-950);
-      color: #e8e8ee;
+      background: #fff;
+      border: 0.3mm solid #e4e4ea;
       border-radius: 3mm;
       padding: 6mm 7mm;
       margin-bottom: 4mm;
-      border: 1px solid var(--eb-dark-700);
+    }
+    .card-accent {
+      background: #fff;
+      border: 0.3mm solid #e4e4ea;
+      border-left: 1mm solid var(--accent-base);
+      border-radius: 2mm;
+      padding: 6mm 7mm;
+      margin-bottom: 4mm;
+    }
+    .card-dark {
+      background: var(--ink-950);
+      color: #e4e4ea;
+      border-radius: 3mm;
+      padding: 6mm 7mm;
+      margin-bottom: 4mm;
+      border: 0.3mm solid var(--ink-700);
     }
     .card-dark .label {
       font-size: 8.5pt;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: var(--accent-light);
       margin-bottom: 3mm;
       font-weight: 700;
     }
 
-    /* ─── STEP / NUMBERED LIST ──────────────────────────────────────────────────────── */
+    /* ─── STEP ──────────────────────────────────────────────────────────────────────────── */
     .step {
       display: flex;
-      gap: 5mm;
-      padding: 4mm 0;
-      border-bottom: 1px solid #eee;
+      gap: 6mm;
+      padding: 5mm 0;
+      border-bottom: 0.3mm solid #e8e8ee;
     }
     .step:last-child { border-bottom: none; }
     .step-num {
       flex-shrink: 0;
-      width: 11mm;
-      height: 11mm;
+      width: 12mm;
+      height: 12mm;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+      background:
+        radial-gradient(circle at 30% 30%, ${c.light}, ${c.base} 50%, ${c.deep});
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-size: 14pt;
+      box-shadow: 0 0 0 0.5mm ${c.deep}40;
     }
-    .step-body h3 { margin-top: 0; }
-    .step-body p { font-size: 10.5pt; color: #4a4a5a; }
+    .step-body h3 { margin-top: 0.5mm; }
+    .step-body p { font-size: 10.5pt; color: #4a4a55; }
 
-    /* ─── BLOCO DO PROMPT (copia e cola) ─────────────────────────────────────────────────── */
+    /* ─── PROMPT BLOCK (escuro) ───────────────────────────────────────────────────────────── */
     .prompt-block {
-      background: var(--eb-dark-950);
-      color: #d4d4d8;
+      background: var(--ink-950);
+      color: #cfcfd6;
       border-radius: 3mm;
-      padding: 6mm 7mm;
+      padding: 7mm 8mm;
       font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 9pt;
-      line-height: 1.55;
+      font-size: 8.8pt;
+      line-height: 1.6;
       white-space: pre-wrap;
       word-break: break-word;
-      border: 1px solid var(--eb-dark-700);
-      margin: 3mm 0 5mm;
+      border: 0.3mm solid var(--ink-700);
+      margin: 4mm 0;
+      border-left: 1mm solid var(--accent-base);
     }
     .prompt-block h1, .prompt-block h2, .prompt-block h3 {
-      color: ${c.solid};
+      color: ${c.light};
       font-family: 'Inter', sans-serif;
-      margin: 4mm 0 2mm;
+      margin: 5mm 0 2.5mm;
     }
     .prompt-block h1 { font-size: 14pt; }
     .prompt-block h2 { font-size: 12pt; }
     .prompt-block h3 { font-size: 10.5pt; }
-    .prompt-block p { color: #d4d4d8; font-size: 9pt; line-height: 1.55; margin-bottom: 2mm; }
+    .prompt-block p { color: #cfcfd6; font-size: 8.8pt; line-height: 1.6; margin-bottom: 2mm; }
     .prompt-block ul, .prompt-block ol { padding-left: 5mm; }
-    .prompt-block li { color: #d4d4d8; font-size: 9pt; line-height: 1.55; margin-bottom: 1mm; }
+    .prompt-block li { color: #cfcfd6; font-size: 8.8pt; line-height: 1.6; margin-bottom: 1mm; }
     .prompt-block strong { color: #fff; }
-    .prompt-block code, .prompt-block pre {
-      background: var(--eb-dark-800);
-      color: ${c.from};
-      padding: 0.5mm 1.5mm;
+    .prompt-block code {
+      background: var(--ink-800);
+      color: ${c.light};
+      padding: 0.4mm 1.5mm;
       border-radius: 1mm;
       font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 8.5pt;
+      font-size: 8.2pt;
     }
     .prompt-block pre {
+      background: var(--ink-800);
+      color: ${c.light};
       padding: 3mm 4mm;
       margin: 2mm 0;
       display: block;
       overflow-x: auto;
+      border-radius: 1.5mm;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
     }
     .prompt-block blockquote {
-      border-left: 1mm solid ${c.solid};
+      border-left: 0.8mm solid ${c.base};
       padding-left: 4mm;
       margin: 2mm 0;
       color: #a0a0aa;
@@ -284,44 +368,45 @@ export function renderStyles(accent: CoverAccent): string {
     .prompt-block table {
       border-collapse: collapse;
       width: 100%;
-      font-size: 8.5pt;
-      margin: 2mm 0;
+      font-size: 8.2pt;
+      margin: 2.5mm 0;
     }
     .prompt-block th, .prompt-block td {
-      border: 1px solid var(--eb-dark-700);
+      border: 0.3mm solid var(--ink-700);
       padding: 1.5mm 3mm;
       text-align: left;
     }
     .prompt-block th {
-      background: var(--eb-dark-800);
-      color: ${c.from};
+      background: var(--ink-800);
+      color: ${c.light};
       font-weight: 700;
     }
     .prompt-block hr {
       border: none;
-      border-top: 1px solid var(--eb-dark-700);
+      border-top: 0.3mm solid var(--ink-700);
       margin: 4mm 0;
     }
 
     /* ─── EXEMPLOS ─────────────────────────────────────────────────────────────────── */
     .example {
-      margin-bottom: 6mm;
-      padding-bottom: 5mm;
-      border-bottom: 1px solid #eee;
+      margin-bottom: 7mm;
+      padding-bottom: 6mm;
+      border-bottom: 0.3mm solid #e8e8ee;
     }
     .example:last-child { border-bottom: none; }
     .example-prompt {
-      background: #f7f7fa;
-      padding: 4mm 5mm;
+      background: #f3f3f7;
+      padding: 5mm 6mm;
       border-radius: 2mm;
-      border-left: 1mm solid var(--accent);
+      border-left: 1mm solid var(--accent-base);
       font-style: italic;
-      color: #1a1a22;
+      color: #18181f;
       margin-bottom: 3mm;
+      font-size: 11pt;
     }
     .example-output {
       font-size: 10.5pt;
-      color: #4a4a5a;
+      color: #4a4a55;
       padding-left: 5mm;
       position: relative;
     }
@@ -329,103 +414,165 @@ export function renderStyles(accent: CoverAccent): string {
       content: '→';
       position: absolute;
       left: 0;
-      color: var(--accent);
+      color: var(--accent-base);
       font-weight: 700;
     }
 
-    /* ─── GRID 2 COL ───────────────────────────────────────────────────────────────── */
+    /* ─── GRID ────────────────────────────────────────────────────────────────────────────── */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 5mm;
-      margin: 4mm 0;
+      margin: 5mm 0;
     }
 
-    /* ─── UPSELL LIST ───────────────────────────────────────────────────────────── */
-    .agent-list { margin-top: 4mm; }
+    /* ─── LISTA AGENTES (upsell) ───────────────────────────────────────────────────────────────── */
+    .agent-list { margin-top: 5mm; }
     .agent-list-item {
       display: flex;
       gap: 4mm;
-      padding: 4mm 0;
-      border-bottom: 1px solid #eee;
+      padding: 5mm 0;
+      border-bottom: 0.3mm solid #e8e8ee;
     }
     .agent-list-item:last-child { border-bottom: none; }
     .agent-list-dot {
       width: 3mm;
       height: 3mm;
       border-radius: 50%;
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--silver-base), var(--gold-base));
       margin-top: 2mm;
       flex-shrink: 0;
     }
     .agent-list-body h4 {
-      font-size: 11pt;
+      font-size: 11.5pt;
       font-weight: 700;
-      color: #0a0a0d;
-      margin-bottom: 1mm;
+      color: var(--ink-950);
+      margin-bottom: 1.5mm;
+      letter-spacing: -0.01em;
     }
     .agent-list-body p {
       font-size: 10pt;
-      color: #4a4a5a;
+      color: #4a4a55;
       margin-bottom: 0;
+      line-height: 1.5;
     }
 
-    /* ─── BACK COVER ────────────────────────────────────────────────────────────── */
+    /* ─── BACK COVER ───────────────────────────────────────────────────────────────────── */
     .back {
-      background: linear-gradient(135deg, #0a0a0d 0%, ${c.to} 100%);
+      background:
+        radial-gradient(circle at 25% 25%, ${c.deep}cc 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, ${c.light}1a 0%, transparent 50%),
+        linear-gradient(180deg, #050507 0%, #0d0d12 100%);
       color: #fff;
-      padding: 30mm 18mm;
+      padding: 28mm 22mm;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      align-items: stretch;
       min-height: 297mm;
+      position: relative;
     }
     .back::before { display: none; }
-    .back-quote {
+
+    .back-logo-section {
+      text-align: center;
+      padding-top: 8mm;
+    }
+
+    .back-logo-section .cb-logo {
+      width: 38mm;
+      height: 38mm;
+      margin: 0 auto 12mm;
+    }
+
+    .back-tagline {
       font-size: 22pt;
-      font-weight: 600;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       line-height: 1.3;
-      letter-spacing: -0.01em;
-      margin-bottom: 8mm;
-      max-width: 160mm;
-    }
-    .back-quote-mark {
-      font-size: 60pt;
-      line-height: 0.5;
-      color: ${c.solid};
+      text-transform: uppercase;
       margin-bottom: 6mm;
-      font-family: Georgia, serif;
     }
+    .back-tagline .silver-text {
+      background: linear-gradient(180deg, #fff 0%, var(--silver-base) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      display: block;
+    }
+    .back-tagline .gold-text {
+      background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold-base) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      display: block;
+    }
+
+    .back-tagline-mark {
+      color: ${c.base};
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16pt;
+      letter-spacing: 0.15em;
+      margin-top: 4mm;
+    }
+
     .back-cta {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      padding: 8mm 10mm;
-      border-radius: 4mm;
+      background: rgba(255,255,255,0.04);
+      border: 0.3mm solid rgba(255,255,255,0.12);
+      padding: 10mm 11mm;
+      border-radius: 3mm;
+      backdrop-filter: blur(8px);
     }
     .back-cta h2 {
       color: #fff;
-      font-size: 16pt;
-      margin: 0 0 3mm;
+      font-size: 17pt;
+      margin: 0 0 4mm;
+      letter-spacing: -0.01em;
     }
     .back-cta p {
-      color: rgba(255,255,255,0.8);
+      color: rgba(255,255,255,0.78);
       font-size: 11pt;
-      margin-bottom: 4mm;
-      line-height: 1.5;
+      margin-bottom: 5mm;
+      line-height: 1.55;
     }
     .back-cta-list {
       list-style: none;
       padding: 0;
     }
     .back-cta-list li {
-      color: rgba(255,255,255,0.9);
-      padding: 1.5mm 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      padding: 2mm 0;
+      border-bottom: 0.3mm solid rgba(255,255,255,0.08);
       font-size: 10.5pt;
       letter-spacing: 0.02em;
     }
     .back-cta-list li:last-child { border: none; }
-    .back-cta-list strong { color: ${c.solid}; font-weight: 700; }
+    .back-cta-list strong {
+      background: linear-gradient(90deg, ${c.light}, ${c.base});
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      font-weight: 700;
+    }
+    .back-cta-contact {
+      margin-top: 6mm;
+      font-size: 13pt;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      background: linear-gradient(90deg, ${c.light}, ${c.base});
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .back-cta-meta {
+      color: rgba(255,255,255,0.55);
+      font-size: 9.5pt;
+      letter-spacing: 0.1em;
+      margin-top: 2mm;
+    }
   `;
 }
